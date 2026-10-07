@@ -796,8 +796,36 @@
 
         /* GROUP CAROUSEL */
         .overlay-group {
-            margin-bottom: 0;
+            margin-bottom: 80px;
             position: relative;
+        }
+
+        .group-carousel {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .group-text {
@@ -831,33 +859,6 @@
             line-height: 1.8;
             color: var(--white);
             max-width: 700px;
-        }
-
-        .group-carousel {
-            position: relative;
-            width: 100%;
-            height: 70vh;
-            overflow: hidden;
-        }
-
-        .carousel-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .carousel-slide.active {
-            opacity: 1;
-        }
-
-        .carousel-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .carousel-nav {
@@ -925,6 +926,7 @@
             height: 70vh;
             overflow: hidden;
             border-radius: 4px;
+            position: relative;
         }
 
         .modal-video {
@@ -932,7 +934,6 @@
             height: 100%;
             object-fit: contain;
             background: #000;
-            transform: rotate(90deg);
         }
 
         .embed-360 iframe {
@@ -980,8 +981,57 @@
                 font-size: 36px;
             }
 
+            .modal-content {
+                padding: 20px;
+            }
+
+            .modal-close {
+                top: 15px;
+                right: 15px;
+                font-size: 40px;
+            }
+
             .group-carousel {
                 height: 50vh;
+            }
+
+            /* Mobile: smaller text overlay */
+            .group-text {
+                padding: 30px 20px 20px;
+                background: linear-gradient(
+                    to top,
+                    rgba(10,10,10,0.9) 0%,
+                    rgba(10,10,10,0.6) 70%,
+                    transparent 100%
+                );
+            }
+
+            .group-text h4 {
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+
+            .group-text p {
+                font-size: 13px;
+                line-height: 1.6;
+                max-width: 100%;
+            }
+
+            /* Mobile: video container for rotation */
+            .modal-video-container {
+                height: 60vh;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .modal-video {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 100vh;
+                height: 100vw;
+                transform: translate(-50%, -50%) rotate(-90deg);
+                object-fit: contain;
             }
         }
     </style>
