@@ -796,12 +796,23 @@
 
         /* GROUP CAROUSEL */
         .overlay-group {
-            margin-bottom: 100px;
+            margin-bottom: 0;
+            position: relative;
         }
 
         .group-text {
-            margin-bottom: 40px;
-            max-width: 800px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 60px 40px 40px;
+            background: linear-gradient(
+                to top,
+                rgba(10,10,10,0.95) 0%,
+                rgba(10,10,10,0.7) 50%,
+                transparent 100%
+            );
+            z-index: 10;
         }
 
         .group-text h4 {
@@ -810,15 +821,16 @@
             letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--copper);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .group-text p {
             font-family: 'Montserrat', sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 300;
-            line-height: 1.9;
-            color: var(--off-white);
+            line-height: 1.8;
+            color: var(--white);
+            max-width: 700px;
         }
 
         .group-carousel {
@@ -826,7 +838,6 @@
             width: 100%;
             height: 70vh;
             overflow: hidden;
-            border-radius: 4px;
         }
 
         .carousel-slide {
@@ -854,10 +865,11 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            margin-top: 20px;
+            padding: 15px 0;
+            background: rgba(255,255,255,0.05);
         }
 
-        .carousel-nav button {
+        .nav-btn {
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.3);
             color: white;
@@ -866,12 +878,23 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
 
-        .carousel-nav span {
+        .nav-btn:hover {
+            background: var(--copper);
+            border-color: var(--copper);
+        }
+
+        .nav-counter {
             font-family: 'Cinzel', serif;
             font-size: 12px;
             color: var(--gray);
+            min-width: 40px;
+            text-align: center;
         }
 
         .construction-photo {
@@ -1364,12 +1387,214 @@
                 ],
                 tour360: '',
                 arLink: ''
+            },
+            '9021-terrace': {
+                title: '9021 Terrace',
+                location: 'Murram Estate, Kenyatta Road, Kiambu, Kenya',
+                video: '9021-terrace/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Design Concept',
+                        text: 'This residential design project addresses the critical challenge of optimizing spatial, structural, and operational efficiency on an exceptionally tight 25 x 50 ft urban plot. To balance built area with open-air amenities, the main building footprint is restricted to 25 x 40 ft, deliberately setting back the structure to leave a dedicated 10 ft rear yard for private family outdoor space.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Open-Plan Configuration',
+                        text: 'The ground floor layout prioritizes uninterrupted visual lines and spatial fluidness by combining the living, dining, and kitchen (LDK) functions into an open-plan configuration. This strategy eliminates unnecessary internal partition walls, maximizing daylight penetration and natural ventilation through the central core.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Space-Saving Solutions',
+                        text: 'To resolve severe interior floor space limitations within the individual bedrooms, the design relies heavily on custom wall-mounted joinery. All major furniture pieces, including wardrobes, study desks, side tables, and foldable bed systems, are suspended or mounted directly onto vertical wall surfaces.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'EPS Structural System',
+                        text: 'Structurally, the project incorporates expanded polystyrene (EPS) panels for both the floor slab construction and primary wall elements. Using EPS technology significantly reduces the dead load of the building, speeds up structural erection times, provides superior thermal and acoustic insulation performance, and optimizes cost efficiency compared to traditional masonry systems.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'buffalo-rd-court': {
+                title: 'Buffalo Rd Court',
+                location: 'Buffalo Rd, Naivasha, Kenya',
+                video: 'buffalo-rd-court/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Project Overview',
+                        text: 'The Buffalo Road Housing project located along Buffalo Road near Lake Naivasha aims to integrate a private residential community harmoniously into its natural surroundings, maintaining a balance between secure micro-density and quiet living quality.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Linear Living Layout',
+                        text: 'The architectural intent is based on creating a linear living layout that meets both the spatial efficiency required for multi-unit housing and the desires for privacy and open-air connectivity. The project organizes six 2-bedroom homes alongside a primary 3-bedroom anchor unit.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Community Integration',
+                        text: 'Centralized pedestrian pathways, dedicated parking nodes, and lush perimeter green buffers guide circulation across the site. The goal was to develop a refined gated scheme that fosters close-knit community interaction while offering a calm retreat along the Lake Naivasha corridor.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Spatial Organization',
+                        text: 'The spatial footprint and material selection are designed to establish a clear residential spine, organizing the units along a central axis with clear zoning for public and private realms.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'chevron-hotel': {
+                title: 'Chevron Hotel',
+                location: 'Mtwapa, Kilifi, Kenya',
+                video: 'chevron-hotel/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Urban Infill Challenge',
+                        text: 'The Urban Infill Hotel addressed the extreme spatial, environmental, and daylighting challenges of high-rise residential design on a 1/8-acre site in the coastal area of Mtwapa, Kilifi county. Sandwiched tightly between two existing multi-storey structures with zero side window access, the design squeezes two distinct room typologies, conference facilities, a public restaurant, a swimming pool, and structured basement parking into a dense vertical envelope.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Chevron Facade System',
+                        text: 'The defining architectural feature of the primary front elevation is a vertical stack of alternating chevron (V-shaped) balconies across four bay sections. The facade alternates floor-by-floor between timber louvered privacy screens and full-glass balustrades, giving the building a dynamic geometric identity while balancing solar shading and visual privacy.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Inward-Focused Orientation',
+                        text: 'Because adjacent structures block all side views, the hotel turns completely inward toward a deep central atrium light void. Guest rooms open up to this central shaft, which is anchored at the ground floor by a raised swimming pool acting as an artificial visual focal point.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Competition Recognition',
+                        text: 'Submitted for the Inspirelli Architectural competition, the project demonstrates radical problem-solving techniques for landlocked parcels, transforming severe constraints into architectural features through innovative vertical planning and facade design.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'migaa-golf': {
+                title: 'Migaa Golf Estate',
+                location: 'Migaa Golf Estate, Kiambu County, Kenya',
+                video: 'migaa-golf/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Steep-Site Strategy',
+                        text: 'This residential project involved the design of a 5-bedroom maisonette situated on a severely sloped site with a +2m vertical rise over a 13m horizontal run. Instead of executing extensive cut-and-fill operations, the architectural response works directly with the natural topography, utilizing a stepped structural approach.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Split-Level Design',
+                        text: 'The design integrates a reinforced concrete retaining wall to stabilize the slope, giving rise to a split-level arrangement featuring both a lower ground floor and an upper ground floor. The spatial program leverages the site elevation changes to establish clear functional zoning and privacy gradations.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Functional Zoning',
+                        text: 'The lower ground floor houses service zones and private recreational areas that open directly onto the lower garden level, while the upper ground floor contains the main entrance, living, dining, and kitchen areas.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Panoramic Views',
+                        text: 'The upper level accommodates the primary sleeping quarters, including an ensuite master suite positioned to take advantage of panoramic views across the estate. Technical outcomes focused on steep-slope site planning, retaining wall design and waterproofing integration, split-level floor plate coordination, and topographical structural design.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'thika-greens': {
+                title: 'Thika Greens',
+                location: 'Thika Greens Estate, Muranga, Kenya',
+                video: 'thika-greens/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Classical Proportions',
+                        text: 'Set within the secure perimeter of Thika Greens Estate, this luxury residence is an exercise in classical proportions adapted for contemporary living. The two-story, five-bedroom villa occupies a full acre, allowing the architecture to establish a commanding presence while maintaining an organic connection to its surrounding grounds.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Neoclassical Facade',
+                        text: 'The exterior facade relies on symmetrical order, polished rusticated plasterwork, and grand multi-story columns that frame the central entrance portico. Deeply set windows, decorative cornices, and refined balustrades pay homage to neoclassical tradition, elevated by high-performance glazing and integrated low-voltage accent lighting.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Interior Grandeur',
+                        text: 'Inside, the ground floor opens into a double-height grand foyer with a sweeping curved staircase, immediately establishing the residence\'s scale. The layout separates formal entertaining venues from private family spaces, featuring an expansive formal living salon, a secondary family lounge, a chef\'s kitchen with custom cabinetry, and a dedicated en-suite guest wing.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Landscape Integration',
+                        text: 'The surrounding acre is developed as an extension of the interior living space. Formal parterre gardens, manicured lawn terraces, and outdoor pavilion seating surround a perimeter infinity pool, creating clear axial vistas from every major living room across the landscaped grounds.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'kerarapon-villa': {
+                title: 'Kerarapon Villa',
+                location: 'Kerarapon, Nairobi, Kenya',
+                video: 'kerarapon-villa/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Modernist Composition',
+                        text: 'Located on the sloped terrain of Kerarapon, The Navy Residence is a two-story, five-bedroom modernist home defined by geometric form and an expressive interior palette. The architectural structure features sharp horizontal cantilevers, smooth concrete finishes, and expansive floor-to-ceiling glass assemblies that capture views of the surrounding green canopy.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Navy Interior Identity',
+                        text: 'The residence takes its name from its distinctive interior identity, where deep navy blue serves as the foundational anchor. Navy wall panels, bespoke millwork, and accent surfaces create an intimate atmosphere, balanced by rich timber ceilings, exposed stone feature walls, and matte black steel fixtures.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Spatial Arrangement',
+                        text: 'The spatial arrangement uses an open floor plan on the ground level, connecting the main living area, dining zone, and minimalist kitchen. Floating stair treads backed by glass guardrails lead to the upper level, where four primary bedroom suites—including a master suite with a private cantilevered balcony—overlook the double-height void below.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Indoor-Outdoor Connection',
+                        text: 'Large glass doors slide away to erase the boundary between the interior living space and an elevated timber deck. Warm exterior cedar cladding and perimeter planters integrate the house into its wooded site context, contrasting with the bold, dark tones of the internal design.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
+            },
+            'kitengela-hearth': {
+                title: 'Kitengela Hearth',
+                location: 'Kitengela, Kajiado, Kenya',
+                video: 'kitengela-hearth/hero-video.mp4',
+                groups: [
+                    {
+                        heading: 'Climate-Conscious Design',
+                        text: 'Situated in the arid landscape of Kitengela, this three-bedroom bungalow reimagines traditional neoclassical motifs through a grounded, climate-conscious palette. Designed as a single-story residence, the house balances classic symmetry with a low-slung, horizontal profile that anchors it into the savanna environment.',
+                        images: ['render-01.jpg', 'render-02.jpg', 'render-03.jpg', 'render-04.jpg']
+                    },
+                    {
+                        heading: 'Earthy Material Palette',
+                        text: 'The exterior replaces crisp white neoclassical finishes with an earthy color palette featuring warm sand renders, textured local stone cladding, and terracotta roof tiles. Porticos and molded architraves are simplified into clean, linear geometries, retaining formal balance while avoiding excessive ornamentation.',
+                        images: ['render-05.jpg', 'render-06.jpg', 'render-07.jpg', 'render-08.jpg']
+                    },
+                    {
+                        heading: 'Passive Cooling Strategy',
+                        text: 'The internal planning organizes around an open-plan central living and dining spine that opens onto a deeply shaded rear veranda. Large sliding doors and high-level clerestory windows encourage cross-ventilation, shielding the interior from afternoon heat while filling the space with diffused natural light and soft, warm tones.',
+                        images: ['render-09.jpg', 'render-10.jpg', 'render-11.jpg', 'render-12.jpg']
+                    },
+                    {
+                        heading: 'Xeriscape Integration',
+                        text: 'The surrounding site design emphasizes native xeriscaping, combining drought-tolerant flora, gravel pathways, and natural stone paving. This low-maintenance landscape frame maintains a cohesive aesthetic connection between the architecture and its local context.',
+                        images: ['render-13.jpg', 'render-14.jpg', 'render-15.jpg', 'render-16.jpg']
+                    }
+                ],
+                tour360: '',
+                arLink: ''
             }
-            // Add other 7 projects here
         };
 
         // RENDER OVERLAY GALLERY
-        function renderOverlayGallery(groups) {
+        function renderOverlayGallery(groups, projectFolder) {
             const gallery = document.getElementById('overlay-gallery');
             gallery.innerHTML = '';
             
@@ -1378,17 +1603,17 @@
                 groupDiv.className = 'overlay-group';
                 
                 let html = `
-                    <div class="group-text">
-                        <h4>${group.heading}</h4>
-                        <p>${group.text}</p>
-                    </div>
                     <div class="group-carousel">
+                        <div class="group-text">
+                            <h4>${group.heading}</h4>
+                            <p>${group.text}</p>
+                        </div>
                 `;
                 
                 group.images.forEach((img, imgIndex) => {
                     html += `
                         <div class="carousel-slide ${imgIndex === 0 ? 'active' : ''}">
-                            <img src="villa-intime/${img}" alt="Render">
+                            <img src="${projectFolder}/${img}" alt="Render">
                         </div>
                     `;
                 });
@@ -1397,9 +1622,9 @@
                 
                 html += `
                     <div class="carousel-nav">
-                        <button onclick="changeGroupImage(${groupIndex}, -1)">‹</button>
-                        <span>1 / ${group.images.length}</span>
-                        <button onclick="changeGroupImage(${groupIndex}, 1)">›</button>
+                        <button class="nav-btn" onclick="changeGroupImage(${groupIndex}, -1)">‹</button>
+                        <span class="nav-counter">1 / ${group.images.length}</span>
+                        <button class="nav-btn" onclick="changeGroupImage(${groupIndex}, 1)">›</button>
                     </div>
                 `;
                 
@@ -1407,7 +1632,7 @@
                     html += `
                         <div class="construction-photo">
                             <h5>Current Construction Progress</h5>
-                            <img src="villa-intime/${group.construction}" alt="Construction">
+                            <img src="${projectFolder}/${group.construction}" alt="Construction">
                         </div>
                     `;
                 }
@@ -1450,8 +1675,9 @@
                 document.getElementById('modal-location').textContent = project.location;
                 document.getElementById('modal-video').src = project.video;
                 
-                // Render overlay gallery
-                renderOverlayGallery(project.groups);
+                // Render overlay gallery with correct folder path
+                const projectFolder = projectId;
+                renderOverlayGallery(project.groups, projectFolder);
                 
                 // 360 Tour
                 if (project.tour360) {
