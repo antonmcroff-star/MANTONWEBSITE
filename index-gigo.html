@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<!--
+  GIGO — interactive narrative v1 (one-shot build)
+  =================================================
+  PLACEHOLDERS YOU MUST REPLACE (search "CONFIG" in the script):
+    1. CONFIG.WAITLIST_ENDPOINT  -> your Google Apps Script /exec URL (see BACKEND notes at bottom of script)
+    2. The three stats in SEGMENTS data -> replace with SOURCED figures before launch
+    3. CONFIG.wordmarkSvg        -> optional SVG logo file; falls back to styled "GIGO" text
+  NOTES:
+    - Everything is procedural (no 3D model files needed for this v1).
+    - To swap the procedural city for your Sketchfab GLB later, see the note above initCity().
+    - Audio hooks are stubbed (CONFIG.soundOn); drop mp3s in /sfx and wire Howler when ready.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GIGO — Become the Architect of the Future</title>
+<meta name="description" content="GIGO automates the architectural design pipeline — site analysis to documentation — so you never have to learn the software. Join the waitlist.">
+<meta name="theme-color" content="#002147">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#002147; --white:#FFFFFF;
+  --ink:#002147; --ink-soft:rgba(0,33,71,.62); --line:rgba(0,33,71,.14);
+  --bg-alt:rgba(0,33,71,.03);
+  --ember:#FF6B35;
+  --hero:clamp(40px,8.4vw,92px); --h2:clamp(30px,5.6vw,58px);
+  --label:11px; --body:15px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--blue);color:var(--ink);font-family:'Archivo',sans-serif;font-weight:300;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+.label{font-size:var(--label);font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+
+/* ============ STAGE + SEGMENTS ============ */
+#stage{position:fixed;inset:0}
+.seg{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none}
+.seg.active{opacity:1;visibility:visible}
+canvas{display:block}
+
+/* ============ UNLOCK ============ */
+#seg-unlock{pointer-events:auto}
+.unlock-bg{position:absolute;inset:0;background:
+  radial-gradient(120% 90% at 50% 110%, #dfe9f4 0%, #f4f8fc 45%, #ffffff 100%)}
+.unlock-contours{position:absolute;inset:0;width:100%;height:100%}
+.wordmark{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.94);
+  font-weight:600;font-stretch:125%;letter-spacing:.14em;font-size:clamp(64px,15vw,190px);
+  color:var(--blue);opacity:0;transition:opacity 1.2s var(--ease),transform 1.2s var(--ease)}
+.wordmark.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.unlock-hint{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);
+  color:var(--ink-soft);opacity:0;transition:opacity .8s var(--ease)}
+.unlock-hint.on{opacity:1}
+#strokeCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+#frost{position:absolute;inset:0;pointer-events:none;
+  backdrop-filter:blur(26px) saturate(1.15);-webkit-backdrop-filter:blur(26px) saturate(1.15);
+  background:rgba(214,228,240,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.96 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E");
+  -webkit-mask-image:radial-gradient(circle var(--r,0px) at var(--fx,50%) var(--fy,50%),transparent 0,transparent calc(var(--r,0px) - 70px),black var(--r,0px));
+  mask-image:radial-gradient(circle var(--r,0px) at var(--fx,50%) var(--fy,50%),transparent 0,transparent calc(var(--r,0px) - 70px),black var(--r,0px))}
+.shake{animation:shake .5s var(--ease)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(6px)}}
+
+#seg-promise{background:linear-gradient(180deg,#fbfdff 0%,#eef4fa 100%)}
+#seg-shatter{background:linear-gradient(180deg,#eef4fa 0%,#e5edf7 100%)}
+#seg-city{background:#f4f7fb}
+
+/* ============ SCROLL TEXT REVEALS ============ */
+.rline{position:absolute;left:50%;transform:translateX(-50%);text-align:center;
+  font-weight:400;letter-spacing:-.02em;font-size:clamp(26px,4.6vw,54px);line-height:1.15;
+  color:var(--blue);opacity:0;filter:blur(14px);white-space:nowrap;will-change:opacity,filter,transform}
+.rline small{display:block;font-size:var(--label);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-soft);margin-top:18px;font-weight:500}
+#hiredWord{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:clamp(72px,17vw,220px);font-weight:600;font-stretch:125%;letter-spacing:.06em;
+  color:transparent;-webkit-text-stroke:2px var(--blue)}
+#hiredWord.fill{color:var(--blue);-webkit-text-stroke:0;animation:bob 3.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-14px)}}
+#glassPane{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#glassSheet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(88vw,900px);height:min(60vh,480px);border-radius:6px;
+  background:linear-gradient(135deg,rgba(255,255,255,.34),rgba(255,255,255,.06));
+  border:1px solid rgba(255,255,255,.75);
+  backdrop-filter:blur(3px) brightness(1.04);-webkit-backdrop-filter:blur(3px) brightness(1.04);
+  box-shadow:0 30px 80px rgba(0,33,71,.12)}
+.shard{position:absolute;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(210,224,238,.55));
+  border:1px solid rgba(255,255,255,.9);will-change:transform,opacity;pointer-events:none}
+#tint{position:absolute;inset:0;background:#000a14;opacity:0;pointer-events:none}
+
+/* hold ring */
+.holdwrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;
+  flex-direction:column;align-items:center;gap:18px;opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+.holdwrap.on{opacity:1}
+.holdwrap .label{color:var(--ink-soft)}
+.holdwrap.dark .label{color:rgba(255,255,255,.65)}
+.ring{width:84px;height:84px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring .bg{stroke:rgba(0,33,71,.15)}
+.ring .fg{stroke:var(--blue);stroke-linecap:round;stroke-dasharray:251.3;stroke-dashoffset:251.3}
+.holdwrap.dark .ring .bg{stroke:rgba(255,255,255,.2)}
+.holdwrap.dark .ring .fg{stroke:#fff}
+
+/* stats */
+.stat{position:absolute;left:50%;transform:translate(-50%,-50%);text-align:center;opacity:0;filter:blur(12px);will-change:opacity,filter}
+.stat .num{font-size:clamp(88px,16vw,200px);font-weight:600;letter-spacing:-.03em;line-height:1;color:var(--blue)}
+.stat .cap{max-width:460px;margin:22px auto 0;font-size:clamp(16px,2vw,22px);line-height:1.5;color:var(--ink-soft)}
+.stat .src{display:block;margin-top:14px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,33,71,.4)}
+#dustCanvas,#emberCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* burn */
+#seg-burn{background:#010813}
+.burn-item{position:absolute;will-change:filter,opacity,transform}
+#clock{left:50%;top:26%;transform:translateX(-50%);text-align:center;color:#e8eef6}
+#clock .t{font-size:clamp(48px,9vw,110px);font-weight:300;letter-spacing:.06em}
+#clock .s{font-size:var(--label);letter-spacing:.24em;text-transform:uppercase;color:rgba(232,238,246,.5);margin-top:10px}
+.bp{position:absolute;width:clamp(140px,18vw,220px);aspect-ratio:1.414/1;background:#f4f8fd;border-radius:2px;
+  box-shadow:0 18px 50px rgba(0,0,0,.5);padding:10px}
+.bp i{display:block;height:1px;background:rgba(0,33,71,.35);margin:9px 4px}
+.bp b{display:block;width:52%;height:2px;background:var(--blue);margin:6px 4px 0}
+.cup{position:absolute;width:34px;height:44px;border-radius:4px 4px 10px 10px;background:#2a3b52;box-shadow:inset 0 -12px 0 #1a2740}
+.cup::after{content:'';position:absolute;right:-11px;top:8px;width:12px;height:18px;border:3px solid #2a3b52;border-radius:0 8px 8px 0;border-left:0}
+#lampGlow{position:absolute;left:50%;top:58%;width:60vmin;height:60vmin;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(255,150,80,.34),rgba(255,110,40,.08) 45%,transparent 70%);pointer-events:none}
+
+/* tunnel */
+#seg-clouds{background:#fff}
+#tunnelSpace{position:absolute;inset:0;perspective:520px;overflow:hidden;background:var(--blue)}
+.tunnel-ring{position:absolute;left:50%;top:50%;border:2px solid rgba(255,255,255,.9);
+  border-radius:24px;will-change:transform,opacity}
+#whiteFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#cloudCanvas{position:absolute;inset:0;width:100%;height:100%}
+#sunGlow{position:absolute;left:50%;top:34%;width:90vmin;height:90vmin;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(255,244,220,.95),rgba(255,255,255,0) 62%);opacity:0;pointer-events:none}
+#seg-clouds{transition:none}
+
+/* city */
+#cityCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
+#cityCanvas.grabbing{cursor:grabbing}
+.city-hint{position:absolute;left:50%;top:8%;transform:translateX(-50%);color:var(--ink-soft);opacity:0;transition:opacity .6s var(--ease);pointer-events:none}
+.city-hint.on{opacity:1}
+#cityCard{position:absolute;left:50%;bottom:0;transform:translate(-50%,110%);width:min(560px,92vw);
+  background:#fff;border:1px solid var(--line);border-radius:10px 10px 0 0;padding:30px 34px;
+  transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(0,33,71,.18);z-index:5}
+#cityCard.open{transform:translate(-50%,0)}
+#cityCard .label{color:var(--ink-soft)}
+#cityCard h3{font-size:26px;font-weight:500;margin:12px 0 10px;letter-spacing:-.01em}
+#cityCard p{font-size:14px;line-height:1.7;color:var(--ink-soft)}
+#cityCard .tools{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+#cityCard .tools span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:20px;padding:6px 12px;color:var(--ink-soft)}
+#cardClose{position:absolute;top:18px;right:20px;background:none;border:0;font-size:20px;color:var(--ink-soft);cursor:pointer;font-family:inherit}
+#continueBtn{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:4;
+  opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+#continueBtn.on{opacity:1;pointer-events:auto}
+.pill{display:inline-block;padding:14px 32px;background:var(--blue);color:#fff;text-decoration:none;border-radius:30px;
+  font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;border:0;cursor:pointer;font-family:inherit}
+
+/* waitlist */
+#seg-waitlist{background:#fff}
+.wait-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:6vw}
+.wait-inner{width:min(560px,100%)}
+.wait-inner .label{color:var(--ink-soft)}
+.wait-inner h2{font-size:var(--h2);font-weight:400;letter-spacing:-.02em;margin:16px 0 14px}
+.wait-inner>p{color:var(--ink-soft);font-size:var(--body);line-height:1.7;margin-bottom:36px}
+.wfield{margin-bottom:18px}
+.wfield input,.wfield textarea{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;
+  padding:14px 2px;font:inherit;font-size:17px;color:var(--ink);outline:none;transition:border-color .3s;resize:none}
+.wfield input:focus,.wfield textarea:focus{border-color:var(--blue)}
+.wfield input::placeholder,.wfield textarea::placeholder{color:rgba(0,33,71,.35)}
+.wsuccess{display:none;text-align:center;padding:40px 0}
+.wsuccess.on{display:block}
+.ws-plane{width:54px;height:54px;margin:0 auto 26px;background:var(--blue);
+  clip-path:polygon(0 40%,100% 0 70% 100% 45% 68% 30% 82%);animation:fly 1.6s var(--ease) forwards}
+@keyframes fly{to{transform:translate(220px,-160px) rotate(18deg);opacity:0}}
+.wsuccess h3{font-size:26px;font-weight:500;margin-bottom:10px}
+.wsuccess p{color:var(--ink-soft);font-size:14px}
+.hp{position:absolute;left:-9999px;opacity:0;height:0}
+
+#scrollCue{position:fixed;left:26px;bottom:26px;z-index:50;display:flex;align-items:center;gap:12px;
+  color:#fff;mix-blend-mode:difference;opacity:0;transition:opacity .6s var(--ease);pointer-events:none}
+#scrollCue.on{opacity:.85}
+#scrollCue .cue-line{width:1px;height:34px;background:#fff;transform-origin:top;animation:cueY 2s var(--ease) infinite}
+@keyframes cueY{0%{transform:scaleY(0)}45%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ============ PERSISTENT UI ============ */
+#xp{position:fixed;top:22px;right:26px;z-index:50;color:#fff;mix-blend-mode:difference;
+  font-size:12px;font-weight:500;letter-spacing:.14em;display:flex;gap:8px;align-items:center}
+#xp svg{width:15px;height:15px}
+#muteBtn{position:fixed;top:20px;right:110px;z-index:50;color:#fff;mix-blend-mode:difference;background:none;
+  border:0;cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+#waitlistPill{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;
+  opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+#waitlistPill.on{opacity:1;pointer-events:auto}
+#progressLine{position:fixed;left:0;top:0;height:2px;width:100%;z-index:60;background:transparent}
+#progressLine i{display:block;height:100%;width:100%;background:#fff;mix-blend-mode:difference;
+  transform-origin:left;transform:scaleX(0)}
+
+@media (max-width:767px){
+  .rline{white-space:normal;width:88vw}
+  #cityCard{padding:24px 22px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- S0 : UNLOCK -->
+  <section class="seg" id="seg-unlock">
+    <div class="unlock-bg"></div>
+    <canvas class="unlock-contours" id="contourCanvas"></canvas>
+    <div class="wordmark" id="wordmark">GIGO</div>
+    <div id="frost"></div>
+    <canvas id="strokeCanvas"></canvas>
+    <div class="unlock-hint label" id="unlockHint">trace the plan</div>
+<div class="unlock-hint label on" style="bottom:8.5%;font-size:10px;letter-spacing:.22em;color:rgba(0,33,71,.45)">draw a closed outline — like tracing a floor plan</div>
+  </section>
+
+  <!-- S1 : PROMISE -->
+  <section class="seg" id="seg-promise"></section>
+
+  <!-- S2 : SHATTER GATE -->
+  <section class="seg" id="seg-shatter">
+    <div id="glassPane"><div id="glassSheet"></div></div>
+    <div id="hiredWord">HIRED</div>
+    <div id="tint"></div>
+    <div class="holdwrap" id="holdShatter">
+      <svg class="ring" viewBox="0 0 90 90"><circle class="bg" cx="45" cy="45" r="40"/><circle class="fg" cx="45" cy="45" r="40"/></svg>
+      <div class="label">hold to shatter the promise</div>
+    </div>
+  </section>
+
+  <!-- S3 : STATS -->
+  <section class="seg" id="seg-stats">
+    <canvas id="dustCanvas"></canvas>
+  </section>
+
+  <!-- S4 : BURN -->
+  <section class="seg" id="seg-burn">
+    <div id="lampGlow"></div>
+    <div class="burn-item" id="clock"><div class="t">3:47<span style="font-size:.4em;vertical-align:super">AM</span></div><div class="s">the night before submission</div></div>
+    <div class="burn-item bp" id="bp1" style="left:16%;top:52%;transform:rotate(-6deg)"><i></i><i></i><i></i><b></b></div>
+    <div class="burn-item bp" id="bp2" style="left:38%;top:60%;transform:rotate(3deg)"><i></i><i></i><i></i><b></b></div>
+    <div class="burn-item bp" id="bp3" style="left:63%;top:54%;transform:rotate(-2deg)"><i></i><i></i><i></i><b></b></div>
+    <div class="burn-item cup" id="cup1" style="left:30%;top:47%"></div>
+    <div class="burn-item cup" id="cup2" style="left:58%;top:68%"></div>
+    <canvas id="emberCanvas"></canvas>
+    <div class="holdwrap dark" id="holdBurn">
+      <svg class="ring" viewBox="0 0 90 90"><circle class="bg" cx="45" cy="45" r="40"/><circle class="fg" cx="45" cy="45" r="40"/></svg>
+      <div class="label">hold to burn it down</div>
+    </div>
+  </section>
+
+  <!-- S5 : TUNNEL -->
+  <section class="seg" id="seg-tunnel">
+    <div id="tunnelSpace"></div>
+    <div id="whiteFlash"></div>
+  </section>
+
+  <!-- S6 : CLOUDS -->
+  <section class="seg" id="seg-clouds">
+    <div id="sunGlow"></div>
+    <canvas id="cloudCanvas"></canvas>
+  </section>
+
+  <!-- S7 : CITY GATE + CITY -->
+  <section class="seg" id="seg-city">
+    <canvas id="cityCanvas"></canvas>
+    <div class="city-hint label" id="cityHint">drag to explore — click markers — scroll to zoom</div>
+    <button class="pill" id="continueBtn">Continue</button>
+    <div id="cityCard">
+      <button id="cardClose" aria-label="Close">×</button>
+      <div class="label" id="cardLabel"></div>
+      <h3 id="cardTitle"></h3>
+      <p id="cardDesc"></p>
+      <div class="tools" id="cardTools"></div>
+      <button class="pill" id="cardJoin">Join the Waitlist</button>
+    </div>
+    <div class="holdwrap" id="holdCity" style="top:42%">
+      <svg class="ring" viewBox="0 0 90 90"><circle class="bg" cx="45" cy="45" r="40"/><circle class="fg" cx="45" cy="45" r="40"/></svg>
+      <div class="label">hold to explore the city</div>
+    </div>
+  </section>
+
+  <!-- S8 : WAITLIST -->
+  <section class="seg" id="seg-waitlist">
+    <div class="wait-wrap">
+      <div class="wait-inner">
+        <div id="wform">
+          <div class="label">Join the Waitlist</div>
+          <h2>Automate everything to be free.</h2>
+          <p>Early access, founding-member pricing, and the first MCP integrations for Revit, Rhino, Archicad and AutoCAD. Tell us where to find you.</p>
+          <form id="waitForm" novalidate>
+            <div class="wfield"><input type="text" id="wName" placeholder="Your name" autocomplete="name" required></div>
+            <div class="wfield"><input type="email" id="wEmail" placeholder="Email address" autocomplete="email" required></div>
+            <div class="wfield"><textarea id="wAuto" rows="2" placeholder="What would you automate first? (optional)"></textarea></div>
+            <input class="hp" type="text" id="wHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button class="pill" type="submit">Join the Waitlist</button>
+            <div class="label" id="wMsg" style="margin-top:18px;color:var(--ember)"></div>
+          </form>
+        </div>
+        <div class="wsuccess" id="wSuccess">
+          <div class="ws-plane"></div>
+          <h3>You're on the list.</h3>
+          <p id="wPos">Position #1 — we'll write soon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="scrollCue" class="label"><span class="cue-line"></span>keep scrolling</div>
+
+<!-- persistent chrome -->
+<div id="progressLine"><i></i></div>
+<div id="xp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.9L22 9.3l-5.4 4.9 1.6 7L12 17.8 5.8 21.2l1.6-7L2 9.3l7.4-.4z"/></svg><span id="xpVal">0</span>&nbsp;XP</div>
+<button id="muteBtn" aria-label="Toggle sound">Sound On</button>
+<a class="pill" id="waitlistPill" href="#" style="position:fixed">Join the Waitlist</a>
+
+<script>
+/* ================================================================
+   CONFIG — the only things you must edit
+================================================================ */
+const CONFIG = {
+  WAITLIST_ENDPOINT: '',                       // ← paste your Google Apps Script /exec URL here
+  wordmarkSvg: '',                             // optional: path to a GIGO logo SVG; '' uses styled text
+  soundOn: true,                               // audio stub — wire real SFX later
+  brand: { blue: '#002147', ember: '#FF6B35', white: '#FFFFFF' }
+};
+
+/* ================================================================
+   STATS — PLACEHOLDERS. Replace with sourced figures before launch.
+   Sources to check: KNBS labour reports, World Bank Kenya briefs,
+   architectural registration board surveys.
+================================================================ */
+const STATS = [
+  { num: '73%', cap: 'of architecture graduates never practice the profession', src: 'source: verify before launch' },
+  { num: '25%', cap: 'of jobless Kenyans have a degree', src: 'source: verify before launch' },
+  { num: '70%', cap: "of a graduate's studio output becomes someone else's profit", src: 'source: verify before launch' }
+];
+const NARRATIVE_LINES = [
+  'where you learn the real',
+  "if you never learnt a software, you don't ever have to",
+  'gigo does it for you',
+  'automate everything to be free',
+  'become the architect of the future',
+  'using real tools that teams use'
+];
+const MARKERS = [
+  { id:'site',     title:'Site Analysis',        cat:'Pipeline · 01', desc:'Sun path, wind, noise, zoning envelopes and context massing — generated from address or coordinates in minutes.', tools:['GIS','Clima','LLM vision'], bx:3, by:3 },
+  { id:'concept',  title:'Concept',              cat:'Pipeline · 02', desc:'Massing options driven by brief, bylaws and taste profiles. You review directions, not drawings.', tools:['Text-to-3D','Bylaw engine'], bx:6, by:2 },
+  { id:'outline',  title:'Outline Design',       cat:'Pipeline · 03', desc:'Structural grid, core placement and circulation resolved automatically against cost heuristics.', tools:['Grid solver','Cost heuristics'], bx:9, by:4 },
+  { id:'scheme',   title:'Scheme Design',        cat:'Pipeline · 04', desc:'Facade, sections and material systems coordinated — every change propagates through the whole model.', tools:['Parametric facade','BIM sync'], bx:5, by:7 },
+  { id:'detail',   title:'Detail Design',        cat:'Pipeline · 05', desc:'Junctions, schedules and assemblies drafted for you. Native CAD control via MCP: Revit, Rhino, Archicad, AutoCAD.', tools:['MCP · Revit','MCP · Rhino','MCP · Archicad','MCP · AutoCAD'], bx:8, by:8 },
+  { id:'render',   title:'Rendering & Docs',     cat:'Pipeline · 06', desc:'Presentation sets, sheets and documentation packages exported in one pass — styled to your template.', tools:['Render farm','Sheet generator'], bx:11, by:6 },
+  { id:'core',     title:'GIGO Core',            cat:'The Consolidator', desc:'One subscription replacing the fragmented tool sprawl. Every stage above, one pipeline, one review loop: yours.', tools:['Unified pipeline','Human review loop'], bx:7, by:5, tower:true }
+];
+
+/* ================================================================
+   UTILITIES
+================================================================ */
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+/* XP */
+let xp = 0; /* resets every visit — by design */
+const foundMarkers = new Set(JSON.parse(localStorage.getItem('gigo_found') || '[]'));
+function addXP(n){ xp += n; $('xpVal').textContent = xp; }
+$('xpVal').textContent = xp;
+
+/* sound stub */
+$('muteBtn').textContent = CONFIG.soundOn ? 'Sound On' : 'Muted';
+$('muteBtn').onclick = () => {
+  CONFIG.soundOn = !CONFIG.soundOn;
+  $('muteBtn').textContent = CONFIG.soundOn ? 'Sound On' : 'Muted';
+  localStorage.setItem('gigo_sound', CONFIG.soundOn ? '1' : '0');
+};
+if (localStorage.getItem('gigo_sound') === '0') { CONFIG.soundOn = false; $('muteBtn').textContent = 'Muted'; }
+
+/* ================================================================
+   VIRTUAL SCROLL ENGINE
+================================================================ */
+const scroll = { target: 0, current: 0, enabled: false, mode: 'scroll' };
+const V = { H: innerHeight };
+addEventListener('resize', () => { V.H = innerHeight; sizeCanvases(); });
+
+let SEGS = [];           // built below
+let TOTAL_VH = 0;
+
+addEventListener('wheel', e => {
+  if (!scroll.enabled || scroll.mode !== 'scroll') { if (scroll.mode === 'city') cityZoom(Math.sign(e.deltaY)); return; }
+  e.preventDefault();
+  scroll.target = clamp(scroll.target + (e.deltaY / V.H) * 42, 0, TOTAL_VH);
+}, { passive: false });
+
+let tY = null;
+addEventListener('touchstart', e => { tY = e.touches[0].clientY; }, { passive: true });
+addEventListener('touchmove', e => {
+  if (tY === null) return;
+  const dy = tY - e.touches[0].clientY; tY = e.touches[0].clientY;
+  if (scroll.mode === 'city') return;
+  if (scroll.enabled) scroll.target = clamp(scroll.target + (dy / V.H) * 42, 0, TOTAL_VH);
+}, { passive: true });
+
+/* gates: [{segId, start, end, done}] — clamp scroll while an incomplete gate is in range */
+const gates = [];
+function clampGates(){
+  for (const g of gates) {
+    if (!g.done && scroll.target > g.start + 1 && scroll.current < g.end) {
+      scroll.target = clamp(scroll.target, g.start, g.end - 0.01);
+      return g;
+    }
+  }
+  return null;
+}
+
+/* ================================================================
+   S0 — UNLOCK : trace a floor-plan loop + frost melt
+================================================================ */
+let unlocked = false;
+(function initUnlock(){
+  const cc = $('contourCanvas');
+  const frost = $('frost'), stroke = $('strokeCanvas');
+  function drawContours(){
+    const dpr = Math.min(devicePixelRatio, 2);
+    cc.width = innerWidth * dpr; cc.height = innerHeight * dpr;
+    const x = cc.getContext('2d'); x.scale(dpr, dpr);
+    x.clearRect(0,0,innerWidth,innerHeight);
+    for (let i = 0; i < 9; i++) {
+      const cx = innerWidth * (0.15 + 0.09 * i), cy = innerHeight * (0.72 - 0.035 * i);
+      x.strokeStyle = 'rgba(0,33,71,' + (0.10 - i * 0.009) + ')';
+      x.lineWidth = 1;
+      x.beginPath();
+      for (let a = 0; a <= Math.PI * 2 + 0.1; a += 0.12) {
+        const r = 60 + i * 26 + Math.sin(a * 3 + i) * 12;
+        const px = cx + Math.cos(a) * r * 1.5, py = cy + Math.sin(a) * r * 0.55;
+        a === 0 ? x.moveTo(px, py) : x.lineTo(px, py);
+      }
+      x.stroke();
+    }
+    for (let i = 0; i < 26; i++) {
+      const px = Math.random() * innerWidth, py = innerHeight * 0.55 + Math.random() * innerHeight * 0.4;
+      x.fillStyle = 'rgba(0,33,71,' + Math.random() * 0.25 + ')';
+      x.fillRect(px, py, 2, 2);
+    }
+  }
+  drawContours();
+
+  function sizeStroke(){
+    const dpr = Math.min(devicePixelRatio, 2);
+    stroke.width = innerWidth * dpr; stroke.height = innerHeight * dpr;
+    const x = stroke.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0);
+    x.lineCap = 'round'; x.lineJoin = 'round';
+  }
+  sizeStroke();
+
+  let pts = [], drawing = false;
+  const sx = stroke.getContext('2d');
+  stroke.addEventListener('pointerdown', e => {
+    if (unlocked) return;
+    drawing = true; pts = [[e.clientX, e.clientY]];
+    sx.clearRect(0,0,innerWidth,innerHeight);
+    sx.beginPath(); sx.moveTo(e.clientX, e.clientY);
+    sx.strokeStyle = '#002147'; sx.lineWidth = 3; sx.stroke();
+    stroke.setPointerCapture(e.pointerId);
+  });
+  stroke.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    pts.push([e.clientX, e.clientY]);
+    sx.lineTo(e.clientX, e.clientY); sx.stroke();
+  });
+  stroke.addEventListener('pointerup', () => {
+    if (!drawing) return; drawing = false;
+    let ccx = 0, ccy = 0;
+    pts.forEach(q => { ccx += q[0]; ccy += q[1]; });
+    lastCentroid = [ccx / pts.length, ccy / pts.length];
+    if (checkLoop(pts)) { unlocked = true; melt(); }
+    else {
+      fails++;
+      $('unlockHint').textContent = fails < 2 ? 'almost — close the loop' : 'stuck? press & hold anywhere to melt';
+      $('unlockHint').classList.add('shake');
+      setTimeout(() => { $('unlockHint').classList.remove('shake'); sx.clearRect(0,0,innerWidth,innerHeight); }, 500);
+    }
+  });
+  let fails = 0;
+  /* guaranteed escape hatch: press & hold 1.4s to melt (always works) */
+  let pressT = null, pressMoved = false;
+  stroke.addEventListener('pointerdown', () => {
+    pressMoved = false;
+    clearTimeout(pressT);
+    pressT = setTimeout(() => { if (!pressMoved && !unlocked) { unlocked = true; melt(); } }, 1400);
+  });
+  stroke.addEventListener('pointermove', () => { if (pts.length > 4) { pressMoved = true; clearTimeout(pressT); } });
+  stroke.addEventListener('pointerup', () => clearTimeout(pressT));
+
+  function checkLoop(p){
+    if (p.length < 12) return false;
+    let per = 0;
+    for (let i = 1; i < p.length; i++) per += Math.hypot(p[i][0]-p[i-1][0], p[i][1]-p[i-1][1]);
+    if (per < 200) return false;                       /* stroke too small */
+    /* resample to 64 equidistant points */
+    const STEP = per / 64, samp = [p[0]];
+    let acc = 0;
+    for (let i = 1; i < p.length && samp.length < 65; i++) {
+      acc += Math.hypot(p[i][0]-p[i-1][0], p[i][1]-p[i-1][1]);
+      while (acc >= STEP && samp.length < 65) { acc -= STEP; samp.push(p[i]); }
+    }
+    const first = samp[0], last = samp[samp.length-1];
+    if (Math.hypot(first[0]-last[0], first[1]-last[1]) > per * 0.32) return false;  /* not closed */
+    let wind = 0, corners = 0;
+    for (let i = 2; i < samp.length; i++) {
+      const a1 = Math.atan2(samp[i-1][1]-samp[i-2][1], samp[i-1][0]-samp[i-2][0]);
+      const a2 = Math.atan2(samp[i][1]-samp[i-1][1], samp[i][0]-samp[i-1][0]);
+      let d = a2 - a1;
+      while (d > Math.PI) d -= Math.PI * 2;
+      while (d < -Math.PI) d += Math.PI * 2;
+      wind += d;
+      if (Math.abs(d) > 0.45) corners++;
+    }
+    return Math.abs(wind) > 4.0 && corners >= 3;       /* closed loop with 3+ corners; circles fail corners */
+  }
+
+  function melt(){
+    $('unlockHint').classList.remove('on');
+    sx.clearRect(0,0,innerWidth,innerHeight);
+    frost.style.setProperty('--fx', (lastCentroid[0] / innerWidth * 100) + '%');
+    frost.style.setProperty('--fy', (lastCentroid[1] / innerHeight * 100) + '%');
+    const t0 = performance.now(), dur = reduced ? 10 : 1900;
+    (function meltAnim(){
+      const t = (performance.now() - t0) / dur;
+      const r = t * Math.max(innerWidth, innerHeight) * 1.6;
+      frost.style.setProperty('--r', r + 'px');
+      if (t < 1) requestAnimationFrame(meltAnim);
+      else frost.style.display = 'none';
+    })();
+    setTimeout(() => {
+      $('wordmark').classList.add('on');
+      const wi = $('wordmarkImg'); if (wi) wi.style.opacity = '1';
+      $('unlockHint').textContent = 'scroll to begin';
+      $('unlockHint').classList.add('on');
+      scroll.enabled = true;
+      $('waitlistPill').classList.add('on');
+      addXP(50);
+    }, reduced ? 50 : 700);
+  }
+  let lastCentroid = [innerWidth/2, innerHeight/2];
+
+  /* wordmark svg override */
+  if (CONFIG.wordmarkSvg) {
+    const img = document.createElement('img');
+    img.src = CONFIG.wordmarkSvg; img.alt = 'GIGO';
+    img.style.cssText = 'position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(60vw,420px);opacity:0;transition:opacity 1.2s var(--ease)';
+    img.id = 'wordmarkImg';
+    $('wordmark').after(img);
+    img.onload = () => { $('wordmark').style.display = 'none'; };
+  }
+})();
+$('wordmarkImg') && 0; /* noop guard */
+/* unlock is a static intro, not a scroll segment: show it, hide it after first scroll */
+$('seg-unlock').classList.add('active');
+
+/* ================================================================
+   SEGMENTS
+================================================================ */
+function makeSeg(id, vh){ const el = $(id); const s = { el, vh, start: 0, entered: false }; SEGS.push(s); return s; }
+
+/* S1 PROMISE */
+const segPromise = makeSeg('seg-promise', 260);
+(function buildPromise(){
+  const lines = [
+    { t: 'study hard.', at: .12 },
+    { t: 'endure studio.', at: .26 },
+    { t: 'get hired.', at: .40 },
+    { t: 'build.', at: .54 }
+  ];
+  lines.forEach(l => {
+    const d = document.createElement('div');
+    d.className = 'rline'; d.textContent = l.t; d.dataset.at = l.at;
+    d.style.top = '42%';
+    segPromise.el.appendChild(d);
+  });
+  const hired = document.createElement('div');
+  hired.className = 'rline'; hired.textContent = 'the promise:'; hired.dataset.at = '.02'; hired.dataset.stay = '1';
+  hired.style.top = '26%'; hired.style.fontSize = 'var(--label)';
+  hired.style.letterSpacing = '.2em'; hired.style.textTransform = 'uppercase';
+  hired.style.fontWeight = '500'; hired.style.color = 'var(--ink-soft)';
+  segPromise.el.appendChild(hired);
+  const hiredBig = document.createElement('div');
+  hiredBig.id = 'hiredBig';
+  hiredBig.style.cssText = 'position:absolute;left:50%;top:58%;transform:translateX(-50%);font-size:clamp(64px,13vw,170px);font-weight:600;font-stretch:125%;letter-spacing:.04em;color:var(--blue);opacity:0;transition:opacity .8s var(--ease)';
+  hiredBig.textContent = 'HIRED';
+  segPromise.el.appendChild(hiredBig);
+  segPromise.onUpdate = p => {
+    segPromise.el.querySelectorAll('.rline').forEach(el => {
+      const at = parseFloat(el.dataset.at);
+      const vin = clamp((p - at) / .06, 0, 1);
+      const vout = el.dataset.stay ? 1 : clamp(1 - (p - at - .10) / .07, 0, 1);
+      const lp = vin * vout;
+      el.style.opacity = lp;
+      el.style.filter = 'blur(' + (1 - lp) * 14 + 'px)';
+      el.style.transform = 'translateX(-50%) translateY(' + (1 - lp) * 26 + 'px)';
+    });
+    const hb = $('hiredBig');
+    const lp = clamp((p - .66) / .10, 0, 1);
+    hb.style.opacity = lp;
+    hb.style.transform = 'translateX(-50%) translateY(' + (1 - lp) * 40 + 'px)';
+  };
+})();
+
+/* S2 SHATTER GATE */
+const segShatter = makeSeg('seg-shatter', 120);
+gates.push({ segId: 'seg-shatter', start: 0, end: 0, done: false });
+(function buildShatter(){
+  const sheet = $('glassSheet'), hold = $('holdShatter'), ringFg = hold.querySelector('.fg');
+  let holding = false, prog = 0, done = false;
+  function setRing(p){ ringFg.style.strokeDashoffset = 251.3 * (1 - p); }
+  function frame(){
+    if (done) return;
+    prog = clamp(prog + (holding ? 1/84 : -1/40), 0, 1);
+    setRing(prog);
+    $('tint').style.opacity = prog * 0.85;
+    if (prog >= 1) { done = true; gates.find(g => g.segId === 'seg-shatter').done = true; shatterNow(); return; }
+    requestAnimationFrame(frame);
+  }
+  function startHold(e){ if (done) return; holding = true; frame(); }
+  function stopHold(){ holding = false; }
+  addEventListener('pointerdown', startHold);
+  addEventListener('pointerup', stopHold);
+  addEventListener('pointercancel', stopHold);
+  let segShatterActive = () => false;
+  buildShatter.isActive = f => { segShatterActive = f; };
+
+  function shatterNow(){
+    hold.classList.remove('on');
+    sheet.style.display = 'none';
+    $('hiredWord').style.display = 'none';
+    const rect = sheet.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    for (let i = 0; i < 46; i++) {
+      const s = document.createElement('div');
+      s.className = 'shard';
+      const w = 14 + Math.random() * 70, h = 10 + Math.random() * 46;
+      const ang = Math.random() * Math.PI * 2, dist = Math.random() * Math.min(rect.width, rect.height) * 0.42;
+      const x0 = cx + Math.cos(ang) * dist, y0 = cy + Math.sin(ang) * dist * 0.6;
+      s.style.cssText = 'left:' + x0 + 'px;top:' + y0 + 'px;width:' + w + 'px;height:' + h + 'px;' +
+        'clip-path:polygon(' + rndTri() + ')';
+      segShatter.el.appendChild(s);
+      const vx = (x0 - cx) * 0.028 + (Math.random() - .5) * 7;
+      const vy = (y0 - cy) * 0.028 - 4 - Math.random() * 5;
+      const vr = (Math.random() - .5) * 22;
+      let sx = x0, sy = y0, r = 0, vyv = vy, t = 0;
+      (function fly(){
+        t += 1/60;
+        vyv += 0.32; sx += vx; sy += vyv; r += vr;
+        s.style.transform = 'translate(' + (sx - x0) + 'px,' + (sy - y0) + 'px) rotate(' + r + 'deg)';
+        s.style.opacity = clamp(1 - t / 1.15, 0, 1);
+        if (t < 1.15) requestAnimationFrame(fly); else s.remove();
+      })();
+    }
+    $('tint').style.opacity = 0;
+    addXP(100);
+  }
+  function rndTri(){
+    const p = [];
+    for (let i = 0; i < 3; i++) p.push((Math.random()*100|0) + '% ' + (Math.random()*100|0) + '%');
+    return p.join(',');
+  }
+  segShatter.onUpdate = p => {
+    const g = gates.find(x => x.segId === 'seg-shatter');
+    sheet.style.opacity = clamp(1 - (p - .55) * 8, 0, 1) * clamp(p * 8, 0, 1);
+    if (p > .5 && !g.done) hold.classList.add('on');
+    if (g.done) hold.classList.remove('on');
+    $('glassPane').style.opacity = clamp(p * 8, 0, 1);
+    $('hiredWord').style.opacity = clamp((p - .1) * 6, 0, 1);
+  };
+  buildShatter.holdActive = () => { const g = gates.find(x => x.segId === 'seg-shatter'); return g.done; };
+})();
+
+/* wire gate ranges after all segs defined (done below in layout) */
+
+/* S3 STATS */
+const segStats = makeSeg('seg-stats', 280);
+gates.push({ segId: 'seg-stats', start: 0, end: 0, done: false, exitHold: true });
+(function buildStats(){
+  segStats.el.style.background = 'linear-gradient(180deg,#f2f6fb 0%,#e8eff7 100%)';
+  STATS.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'stat';
+    d.style.top = (34 + (i % 2) * 6) + '%';
+    d.innerHTML = '<div class="num">' + s.num + '</div><div class="cap">' + s.cap + '</div><span class="src">' + s.src + '</span>';
+    segStats.el.appendChild(d);
+  });
+  const hold = document.createElement('div');
+  hold.className = 'holdwrap'; hold.id = 'holdStatsExit';
+  hold.style.top = '78%';
+  hold.innerHTML = '<svg class="ring" viewBox="0 0 90 90"><circle class="bg" cx="45" cy="45" r="40"/><circle class="fg" cx="45" cy="45" r="40"/></svg><div class="label">hold to burn it down</div>';
+  segStats.el.appendChild(hold);
+  segStats.onUpdate = p => {
+    segStats.el.querySelectorAll('.stat').forEach((el, i) => {
+      const at = .12 + i * .24;
+      const lp = clamp((p - at) / .09, 0, 1) * clamp(1 - (p - (at + .17)) / .07, 0, 1);
+      el.style.opacity = lp;
+      el.style.filter = 'blur(' + (1 - lp) * 12 + 'px)';
+    });
+    const g = gates.find(x => x.segId === 'seg-stats');
+    hold.classList.toggle('on', p > .82 && !g.done);
+  };
+})();
+
+/* S4 BURN */
+const segBurn = makeSeg('seg-burn', 300);
+(function buildBurn(){
+  const hold = $('holdBurn'), ringFg = hold.querySelector('.fg');
+  let holding = false, prog = 0, done = false;
+  const items = [
+    { el: $('bp1'), at: .16 }, { el: $('bp2'), at: .24 }, { el: $('bp3'), at: .20 },
+    { el: $('cup1'), at: .32 }, { el: $('cup2'), at: .36 }, { el: $('clock'), at: .40 }
+  ];
+  items.forEach(i => { i.base = i.el.style.transform || ''; });
+  (function frame(){
+    if (done) return;
+    if (holding || prog > 0) {
+      prog = clamp(prog + (holding ? 1/84 : -1/60), 0, 1);
+      ringFg.style.strokeDashoffset = 251.3 * (1 - prog);
+      if (prog >= 1) { done = true; gates.find(g => g.segId === 'seg-stats').done = true; hold.classList.remove('on'); addXP(100); }
+    }
+    requestAnimationFrame(frame);
+  })();
+  addEventListener('pointerdown', () => {
+    const g = gates.find(x => x.segId === 'seg-stats');
+    if (g && !g.done && segStats.el.classList.contains('active') && isSegP(segStats) > .82) holding = true;
+  });
+  addEventListener('pointerup', () => holding = false);
+
+  segBurn.onUpdate = p => {
+    items.forEach(i => {
+      const b = clamp((p - i.at) / .16, 0, 1);
+      if (b <= 0) return;
+      i.el.style.opacity = clamp(1 - (b - .55) / .45, 0, 1);
+      i.el.style.filter = 'brightness(' + (1 - b * .9) + ') sepia(' + b * .9 + ') saturate(' + (1 + b * 2) + ')';
+      i.el.style.boxShadow = b > .05 && b < .9 ? '0 0 ' + (60 * b) + 'px rgba(255,107,53,' + (0.8 * Math.sin(b * Math.PI)) + ')' : 'none';
+    });
+    $('lampGlow').style.opacity = clamp(1 - (p - .3) / .25, 0, 1);
+    hold.classList.toggle('on', p > .86 && !done);
+  };
+})();
+
+/* S5 TUNNEL */
+const segTunnel = makeSeg('seg-tunnel', 340);
+(function buildTunnel(){
+  const space = $('tunnelSpace');
+  const N = 16, GAP = 420;
+  const rings = [];
+  for (let i = 0; i < N; i++) {
+    const r = document.createElement('div');
+    r.className = 'tunnel-ring';
+    const sz = 56; /* vmin-ish; sized via JS on resize */
+    r.dataset.i = i;
+    space.appendChild(r); rings.push(r);
+  }
+  const lineEls = NARRATIVE_LINES.map((t, i) => {
+    const d = document.createElement('div');
+    d.classText = '';
+    d.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:88vw;' +
+      'font-size:clamp(30px,5.6vw,66px);font-weight:500;letter-spacing:-.02em;line-height:1.12;color:#fff;opacity:0;will-change:opacity,transform,filter';
+    d.textContent = t;
+    space.appendChild(d);
+    return d;
+  });
+  function layoutRings(){
+    const base = Math.min(innerWidth, innerHeight) * 0.66;
+    rings.forEach(r => { r.style.width = r.style.height = base + 'px'; });
+  }
+  layoutRings();
+  addEventListener('resize', layoutRings);
+  const intro = document.createElement('div');
+  intro.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:90vw;will-change:opacity,transform';
+  intro.innerHTML = '<div class="label" style="color:rgba(255,255,255,.55);letter-spacing:.28em;margin-bottom:3vh">INTRODUCING</div>' +
+    '<div style="font-size:clamp(72px,16vw,200px);font-weight:600;font-stretch:125%;letter-spacing:.1em;color:#fff;line-height:1">GIGO</div>';
+  space.appendChild(intro);
+  segTunnel.onUpdate = p => {
+    const camZ = p * (N * GAP) + 100;
+    const io = clamp((p - .02) / .07, 0, 1) * clamp(1 - (p - .14) / .07, 0, 1);
+    intro.style.opacity = io;
+    intro.style.transform = 'translate(-50%,-50%) scale(' + (0.94 + io * 0.06) + ')';
+    rings.forEach((r, i) => {
+      const z = -i * GAP + camZ;
+      const op = clamp(1 - Math.abs(z - 120) / 1500, 0, 1) * (z > 260 ? 0 : 1);
+      r.style.transform = 'translate(-50%,-50%) translateZ(' + Math.min(z, 400) + 'px)';
+      r.style.opacity = op * (0.55 + 0.45 * Math.sin(z * 0.01 + performance.now() * 0.002));
+      r.style.borderColor = i % 4 === 0 ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.45)';
+    });
+    const fi = clamp((p - .17) * 7.6, 0, 5.999);
+    lineEls.forEach((el, i) => {
+      const lp = clamp(1 - Math.abs(fi - i - 0.5) * 2.2, 0, 1);
+      el.style.opacity = lp;
+      el.style.filter = 'blur(' + (1 - lp) * 10 + 'px)';
+      el.style.transform = 'translate(-50%,-50%) scale(' + (0.92 + lp * 0.08) + ')';
+    });
+    $('whiteFlash').style.opacity = clamp((p - .93) / .07, 0, 1);
+  };
+})();
+
+/* S6 CLOUDS */
+const segClouds = makeSeg('seg-clouds', 220);
+(function buildClouds(){
+  const cv = $('cloudCanvas');
+  /* precompute noise tile */
+  const tile = document.createElement('canvas'); tile.width = tile.height = 256;
+  const tx = tile.getContext('2d'), img = tx.createImageData(256, 256);
+  const grid = []; for (let i = 0; i < 17 * 17; i++) grid.push(Math.random());
+  const gv = (x, y) => grid[(y % 16) * 17 + (x % 16)];
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const gx = x / 16, gy = y / 16, fx = gx % 1, fy = gy % 1;
+    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    const v = lerp(lerp(gv(gx|0, gy|0), gv((gx|0)+1, gy|0), sx), lerp(gv(gx|0, (gy|0)+1), gv((gx|0)+1, (gy|0)+1), sx), sy);
+    const a = clamp((v - 0.32) * 2.2, 0, 1) * 255;
+    const k = (y * 256 + x) * 4;
+    img.data[k] = 255; img.data[k+1] = 255; img.data[k+2] = 255; img.data[k+3] = a;
+  }
+  tx.putImageData(img, 0, 0);
+  let entered = false;
+  segClouds.onUpdate = p => {
+    if (!entered && segClouds.el.classList.contains('active')) { entered = true; sizeClouds(); }
+    const dpr = Math.min(devicePixelRatio, 1.5);
+    const x = cv.getContext('2d');
+    x.clearRect(0,0,cv.width,cv.height);
+    const fade = 1 - p * 0.55;
+    x.globalAlpha = fade;
+    const scale = 3.2;
+    for (let oy = -1; oy < cv.height / (256 * scale) + 1; oy++)
+      for (let ox = -1; ox < cv.width / (256 * scale) + 1; ox++)
+        x.drawImage(tile, ox * 256 * scale, oy * 256 * scale, 256 * scale + 1, 256 * scale + 1);
+    x.globalAlpha = 1;
+    /* part the clouds around center */
+    const r = (0.12 + p * 1.3) * Math.max(cv.width, cv.height) * 0.55;
+    x.globalCompositeOperation = 'destination-out';
+    const g = x.createRadialGradient(cv.width/2, cv.height*0.42, r*0.4, cv.width/2, cv.height*0.42, r);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0,0,cv.width,cv.height);
+    x.globalCompositeOperation = 'source-over';
+    $('sunGlow').style.opacity = clamp((p - .25) / .3, 0, 1);
+  };
+  function sizeClouds(){
+    const dpr = Math.min(devicePixelRatio, 1.5);
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  }
+  addEventListener('resize', () => { if (entered) sizeClouds(); });
+})();
+
+/* S7 CITY */
+const segCity = makeSeg('seg-city', 120);
+gates.push({ segId: 'seg-city', start: 0, end: 0, done: false });
+(function buildCity(){
+  const cv = $('cityCanvas'), ctx = cv.getContext('2d');
+  function sizeCity(){ const d = Math.min(devicePixelRatio, 1.5);
+    cv.width = innerWidth * d; cv.height = innerHeight * d;
+    ctx.setTransform(d, 0, 0, d, 0, 0); }
+  sizeCity(); addEventListener('resize', sizeCity);
+  let camX = 0, camY = 0, zoom = 1, cityEntered = false;
+  const TILE = 46, HW = 14, HH = 8; /* iso half-widths */
+  const buildings = [];
+  (function gen(){
+    for (let gx = 0; gx < 14; gx++) for (let gy = 0; gy < 14; gy++) {
+      if ((gx + gy) % 5 === 0) continue; /* streets */
+      const decayed = gx > 9 && gy < 5;
+      const tower = MARKERS.some(m => m.tower && m.bx === gx && m.by === gy);
+      const h = tower ? 190 : 24 + ((gx * 7 + gy * 13) % 60);
+      buildings.push({ gx, gy, h, decayed, tower,
+        w: tower ? 1.6 : 0.72 + ((gx + gy) % 3) * 0.1 });
+    }
+  })();
+  MARKERS.forEach(m => { m.disc = foundMarkers.has(m.id); });
+
+  function project(gx, gy, z){
+    return {
+      x: innerWidth / 2 + ((gx - gy) * HW) * zoom + camX,
+      y: innerHeight * 0.36 + ((gx + gy) * HH - z) * zoom + camY
+    };
+  }
+  function draw(){
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    /* ground */
+    ctx.fillStyle = '#f4f7fb';
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+    buildings.slice().sort((a, b) => (a.gx + a.gy) - (b.gx + b.gy)).forEach(b => {
+      const s = b.w * TILE * zoom / 46;
+      const w = TILE * b.w * zoom, d = TILE * b.w * zoom;
+      const p0 = project(b.gx, b.gy, 0), p1 = project(b.gx + b.w * 1.35, b.gy, 0),
+            p2 = project(b.gx + b.w * 1.35, b.gy + b.w * 1.35, 0), p3 = project(b.gx, b.gy + b.w * 1.35, 0);
+      const q0 = project(b.gx, b.gy, b.h), q1 = project(b.gx + b.w * 1.35, b.gy, b.h),
+            q2 = project(b.gx + b.w * 1.35, b.gy + b.w * 1.35, b.h), q3 = project(b.gx, b.gy + b.w * 1.35, b.h);
+      let cTop = '#ffffff', cL = '#dfe7f0', cR = '#c3d0de';
+      if (b.decayed) { cTop = '#e6e6e4'; cL = '#d0d0cd'; cR = '#b9b9b5'; }
+      if (b.tower)   { cTop = '#0a3566'; cL = '#002147'; cR = '#001430'; }
+      poly([q0,q1,q2,q3], cTop);
+      poly([p3,p2,q2,q3], cR);
+      poly([p1,p2,q2,q1], cL);
+      if (b.tower) {
+        ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1;
+        for (let i = 1; i < 6; i++) {
+          const a = project(b.gx, b.gy, b.h * i / 6), bb = project(b.gx + b.w * 1.35, b.gy, b.h * i / 6);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(bb.x, bb.y); ctx.stroke();
+        }
+      }
+    });
+    /* markers */
+    const t = performance.now();
+    MARKERS.forEach(m => {
+      const base = project(m.bx + 0.7, m.by + 0.7, (m.tower ? 190 : 84) + 26);
+      const pulse = m.disc ? 0 : Math.sin(t * 0.004 + m.bx) * 3;
+      ctx.beginPath();
+      ctx.arc(base.x, base.y + pulse, 9, 0, 7);
+      ctx.fillStyle = m.tower ? '#FF6B35' : '#002147';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(base.x, base.y + pulse, 14 + (t * 0.05 % 12), 0, 7);
+      ctx.strokeStyle = m.tower ? 'rgba(255,107,53,.4)' : 'rgba(0,33,71,.3)';
+      ctx.lineWidth = 1.5; ctx.stroke();
+      m.sx = base.x; m.sy = base.y + pulse;
+    });
+  }
+  function poly(pts, fill){
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = 'rgba(0,33,71,.10)'; ctx.lineWidth = 1; ctx.stroke();
+  }
+  let raf = null;
+  function loop(){ draw(); raf = requestAnimationFrame(loop); }
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && cityEntered) { if (!raf) loop(); }
+    else { cancelAnimationFrame(raf); raf = null; }
+  }).observe(segCity.el);
+
+  /* pan + click */
+  let drag = null, moved = 0;
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; moved = 0; cv.classList.add('grabbing'); cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => {
+    if (!drag) return;
+    camX += e.clientX - drag.x; camY += e.clientY - drag.y;
+    moved += Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
+    drag = { x: e.clientX, y: e.clientY };
+  });
+  cv.addEventListener('pointerup', e => {
+    cv.classList.remove('grabbing');
+    if (drag && moved < 8) {
+      const m = MARKERS.find(m => Math.hypot(e.clientX - m.sx, e.clientY - m.sy) < 24);
+      if (m) openCard(m);
+    }
+    drag = null;
+  });
+  function cityZoom(dir){ zoom = clamp(zoom * (dir > 0 ? 0.9 : 1.1), 0.55, 2.4); }
+  window.cityZoom = cityZoom;
+
+  /* hold to enter */
+  const hold = $('holdCity'), ringFg = hold.querySelector('.fg');
+  let holding = false, prog = 0, enteredDone = false;
+  (function frame(){
+    if (enteredDone) return;
+    if (holding || prog > 0) {
+      prog = clamp(prog + (holding ? 1/84 : -1/50), 0, 1);
+      ringFg.style.strokeDashoffset = 251.3 * (1 - prog);
+      if (prog >= 1) enterCity();
+    }
+    requestAnimationFrame(frame);
+  })();
+  function enterCity(){
+    enteredDone = true; cityEntered = true;
+    gates.find(g => g.segId === 'seg-city').done = true;
+    hold.classList.remove('on');
+    scroll.mode = 'city';
+    $('cityHint').classList.add('on');
+    $('continueBtn').classList.add('on');
+    if (!raf) loop();
+    addXP(100);
+  }
+  addEventListener('pointerdown', () => {
+    const g = gates.find(x => x.segId === 'seg-city');
+    if (g && !g.done && segCity.el.classList.contains('active') && isSegP(segCity) > .3) holding = true;
+  });
+  addEventListener('pointerup', () => holding = false);
+  segCity.onUpdate = p => {
+    hold.classList.toggle('on', p > .3 && !enteredDone);
+  };
+  $('continueBtn').onclick = () => {
+    scroll.mode = 'scroll';
+    $('cityHint').classList.remove('on');
+    $('continueBtn').classList.remove('on');
+    closeCard();
+    scroll.target = TOTAL_VH;
+  };
+
+  /* card */
+  function openCard(m){
+    $('cardLabel').textContent = m.cat;
+    $('cardTitle').textContent = m.title;
+    $('cardDesc').textContent = m.desc;
+    $('cardTools').innerHTML = m.tools.map(t => '<span>' + t + '</span>').join('');
+    $('cityCard').classList.add('open');
+    if (!m.disc) { m.disc = true; foundMarkers.add(m.id); localStorage.setItem('gigo_found', JSON.stringify([...foundMarkers])); addXP(50); }
+  }
+  function closeCard(){ $('cityCard').classList.remove('open'); }
+  $('cardClose').onclick = closeCard;
+  $('cardJoin').onclick = () => { closeCard(); goWaitlist(); };
+})();
+
+/* S8 WAITLIST */
+const segWait = makeSeg('seg-waitlist', 160);
+(function buildWait(){
+  segWait.onUpdate = p => {
+    const el = segWait.el.querySelector('.wait-inner');
+    el.style.opacity = clamp(p * 6, 0, 1);
+    el.style.transform = 'translateY(' + (1 - clamp(p * 6, 0, 1)) * 40 + 'px)';
+  };
+  $('waitForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = $('wMsg');
+    const name = $('wName').value.trim(), email = $('wEmail').value.trim();
+    if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Please add your name and a valid email.'; return; }
+    msg.textContent = '';
+    const payload = { name, email, automate_first: $('wAuto').value.trim(), website: $('wHp').value };
+    let position = null;
+    try {
+      if (CONFIG.WAITLIST_ENDPOINT) {
+        const res = await fetch(CONFIG.WAITLIST_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
+        position = 'the queue';
+      } else {
+        /* DEMO MODE: endpoint not configured yet — simulate success */
+        await new Promise(r => setTimeout(r, 900));
+        const n = parseInt(localStorage.getItem('gigo_demo_pos') || '1', 10);
+        localStorage.setItem('gigo_demo_pos', n + 1);
+        position = '#' + n;
+      }
+      $('wform').style.display = 'none';
+      $('wSuccess').classList.add('on');
+      $('wPos').textContent = position === 'the queue'
+        ? "You're on the list — we'll write soon."
+        : "Position " + position + " — we'll write soon.";
+      addXP(200);
+    } catch (err) {
+      msg.textContent = 'Something went wrong — try again.';
+    }
+  });
+})();
+
+/* ================================================================
+   LAYOUT SEGMENT RANGES + GATES
+================================================================ */
+(function layout(){
+  let acc = 0;
+  SEGS.forEach(s => { s.start = acc; acc += s.vh; });
+  TOTAL_VH = acc;
+  gates.forEach(g => { const s = SEGS.find(x => x.el.id === g.segId); g.start = s.start; g.end = s.start + s.vh; });
+})();
+function isSegP(s){
+  return clamp((scroll.current - s.start) / s.vh, 0, 1);
+}
+
+/* ================================================================
+   MAIN LOOP
+================================================================ */
+let lastXpTick = 0;
+(function mainLoop(){
+  requestAnimationFrame(mainLoop);
+  clampGates();
+  scroll.current = lerp(scroll.current, scroll.target, 0.09);
+  $('progressLine').firstElementChild.style.transform = 'scaleX(' + (scroll.current / TOTAL_VH) + ')';
+  if (scroll.current > V.H * 0.35 && $('seg-unlock').classList.contains('active'))
+    $('seg-unlock').classList.remove('active');
+  $('scrollCue').classList.toggle('on', scroll.enabled && scroll.mode === 'scroll' && scroll.current < TOTAL_VH - 4);
+  const xpTick = Math.floor(scroll.current / 100);
+  if (xpTick > lastXpTick) { addXP((xpTick - lastXpTick) * 10); lastXpTick = xpTick; }
+  SEGS.forEach(s => {
+    const p = isSegP(s);
+    const active = p > 0.001 && p < 0.999;
+    if (active && !s.el.classList.contains('active')) s.el.classList.add('active');
+    if (!active && s.el.classList.contains('active')) s.el.classList.remove('active');
+    if (s.onUpdate && (active || s.el.classList.contains('active'))) s.onUpdate(p);
+  });
+})();
+
+/* ================================================================
+   PARTICLES — ember/dust canvases (size + draw)
+================================================================ */
+function sizeCanvases(){
+  [['dustCanvas', 1], ['emberCanvas', 1]].forEach(([id]) => {
+    const c = $(id); if (!c) return;
+    const dpr = Math.min(devicePixelRatio, 1.5);
+    c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+    c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  });
+}
+sizeCanvases();
+(function particles(){
+  const mk = (id, n, colFn, vyFn, sizeFn) => {
+    const c = $(id), x = c.getContext('2d');
+    const ps = Array.from({ length: n }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, a: Math.random() }));
+    return { c, x, ps, colFn, vyFn, sizeFn, n };
+  };
+  const dust = mk('dustCanvas', 70, a => 'rgba(255,140,60,' + (0.12 + a * 0.25) + ')', a => 0.12 + a * 0.3, a => 0.8 + a * 1.6);
+  const ember = mk('emberCanvas', 110, a => 'rgba(255,' + (107 + a * 80 | 0) + ',' + (53 + a * 40 | 0) + ',' + (0.25 + a * 0.6) + ')', a => 0.5 + a * 1.4, a => 1 + a * 2.2);
+  function draw(sys, rise){
+    const x = sys.x;
+    x.clearRect(0, 0, innerWidth, innerHeight);
+    sys.ps.forEach(p => {
+      p.y -= sys.vyFn(p.a);
+      p.x += Math.sin(p.y * 0.01 + p.a * 9) * 0.3;
+      if (p.y < -8) { p.y = innerHeight + 8; p.x = Math.random() * innerWidth; }
+      x.beginPath();
+      x.arc(p.x, p.y, sys.sizeFn(p.a), 0, 7);
+      x.fillStyle = sys.colFn(p.a);
+      x.fill();
+    });
+  }
+  (function pLoop(){
+    requestAnimationFrame(pLoop);
+    if ($('seg-stats').classList.contains('active')) draw(dust);
+    if ($('seg-burn').classList.contains('active')) draw(ember);
+  })();
+})();
+
+/* ================================================================
+   WAITLIST PILL + helpers
+================================================================ */
+function goWaitlist(){ scroll.target = TOTAL_VH; scroll.mode = 'scroll'; }
+$('waitlistPill').addEventListener('click', e => { e.preventDefault(); if (scroll.enabled) goWaitlist(); });
+
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { $('cityCard').classList.remove('open'); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<!--
+  MANTON — v2 FINAL (FIXED)
+  =====================================================
+  ALL FIXES APPLIED:
+    - Materials: names sync with scroll
+    - AR/360 links: wired to all projects
+    - Portfolio: thumbnail after 8 projects
+    - Time-of-day: fullscreen seamless crossfade, no buttons
+    - Nav: About, Work, Portfolio, Experience, Materials, Contact
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANTON — Monolithic Private Residences · Nairobi</title>
+<meta name="description" content="Manton — monolithic private residences and curated illumination environments. Designed, modeled and rendered in Nairobi, Kenya.">
+<meta name="theme-color" content="#FFFFFF">
+<meta property="og:title" content="MANTON — Monolithic Private Residences">
+<meta property="og:description" content="Curated illumination environments. Designed, modeled and rendered in Nairobi, Kenya.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="project1.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"LocalBusiness","name":"Manton Enterprises",
+  "description":"Monolithic private residences and curated illumination environments.",
+  "address":{"@type":"PostalAddress","streetAddress":"Karen Road","addressLocality":"Nairobi","addressCountry":"KE"},
+  "email":"chegeantony74@gmail.com","telephone":"+254792003373" }
+</script>
+<style>
+:root{
+  --blue:#002147; --bg:#FFFFFF; --bg-alt:rgba(0,33,71,0.03);
+  --ink:#002147; --ink-soft:rgba(0,33,71,0.62); --line:rgba(0,33,71,0.12);
+  --step-hero:clamp(44px,8vw,88px); --step-h2:clamp(30px,5.4vw,54px);
+  --step-h3:22px; --step-label:11px; --step-body:15px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Archivo',sans-serif;font-weight:300;overflow-x:hidden}
+img{display:block;max-width:100%}
+section{scroll-margin-top:0}
+h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
+.label{font-size:var(--step-label);font-weight:500;letter-spacing:0.15em;text-transform:uppercase}
+.body-text{font-size:var(--step-body);line-height:1.7;color:var(--ink-soft)}
+
+/* ---------- reveal ---------- */
+[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+[data-reveal].revealed{opacity:1;transform:none}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
+  padding:26px 4vw;mix-blend-mode:difference;color:#fff;opacity:0;transition:opacity .6s var(--ease);pointer-events:none}
+.nav.visible{opacity:1;pointer-events:auto}
+.nav-logo{font-size:14px;font-weight:600;letter-spacing:.25em;color:#fff;text-decoration:none}
+.nav-links{display:flex;gap:34px}
+.nav-links a{color:#fff;text-decoration:none;font-size:12px;font-weight:400;letter-spacing:.12em;text-transform:uppercase}
+.menu-toggle{display:none;background:none;border:0;color:#fff;font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.menu-overlay{position:fixed;inset:0;background:var(--bg);z-index:950;display:none;flex-direction:column;justify-content:center;padding:0 8vw}
+.menu-overlay.open{display:flex}
+.menu-overlay a{font-size:clamp(34px,8vw,64px);font-weight:500;letter-spacing:-0.02em;color:var(--ink);text-decoration:none;padding:12px 0;border-bottom:1px solid var(--line)}
+.menu-close{position:absolute;top:26px;right:4vw;background:none;border:0;font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);cursor:pointer}
+
+/* ---------- hero ---------- */
+.hero{position:relative;width:100vw;height:200vh}
+.hero-sticky{position:sticky;top:0;width:100%;height:100vh;overflow:hidden}
+.hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#image-warm{opacity:0}
+.hero-shade{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 45%)}
+.hero-content{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;width:90%;max-width:900px}
+.hero-logo-wrap{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.hero-logo{height:clamp(120px,18vw,200px);width:auto;filter:brightness(0) invert(1);margin:0 auto 30px}
+.hero-wordmark{font-size:clamp(40px,7vw,72px);font-weight:600;letter-spacing:.18em;font-stretch:125%;color:#fff;display:none;
+  text-shadow:0 1px 24px rgba(0,0,0,.25)}
+.hero-subtitle{color:#fff;font-size:clamp(16px,2.5vw,24px);font-weight:400;letter-spacing:0.3em;opacity:0;animation:rise 1.1s var(--ease) .35s forwards;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+.hero-description{color:rgba(255,255,255,.9);font-size:clamp(13px,1.5vw,16px);max-width:480px;margin:20px auto 0;line-height:1.7;opacity:0;animation:rise 1.1s var(--ease) .5s forwards;text-shadow:0 2px 16px rgba(0,0,0,.4)}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.scroll-cue{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:14px;color:#fff;opacity:0;animation:rise 1s var(--ease) .8s forwards}
+.scroll-cue .cue-line{width:1px;height:44px;background:#fff;transform-origin:top;animation:cue 2.2s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(0)}45%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- about ---------- */
+.about{min-height:100vh;display:grid;grid-template-columns:55% 45%;gap:6vw;padding:16vh 8vw;background:var(--bg)}
+.about-name{font-size:14px;font-weight:500;margin-bottom:5vh}
+.about-statement{font-size:var(--step-hero);font-weight:400;line-height:1.06;font-stretch:125%;letter-spacing:-0.02em;max-width:14ch}
+.about-welcome{display:flex;gap:18px;margin-top:6vh;max-width:460px}
+.about-welcome .star{font-size:26px;line-height:1;color:var(--blue)}
+.about-visual{position:relative}
+.about-marquee{overflow:hidden;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:26px;white-space:nowrap}
+.about-marquee span{display:inline-block;font-size:var(--step-label);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);
+  animation:marquee 22s linear infinite}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.portrait-frame{position:relative;background:var(--bg-alt);aspect-ratio:3/4;overflow:hidden}
+.portrait-frame img{width:100%;height:110%;object-fit:cover;will-change:transform}
+.portrait-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(48px,8vw,96px);font-weight:600;letter-spacing:.2em;color:rgba(0,33,71,.14);font-stretch:125%}
+.about-card{position:absolute;right:-8%;bottom:-6%;width:min(280px,60%);background:#fff;border:1px solid var(--line);
+  padding:14px;transform:rotate(-4deg);box-shadow:0 24px 60px rgba(0,33,71,.14)}
+.about-card img{aspect-ratio:4/3;object-fit:cover}
+.about-card .label{display:block;margin-top:12px}
+
+/* ---------- works ---------- */
+.works{background:var(--bg);padding:14vh 0 10vh}
+.works-header{padding:0 8%;margin-bottom:8vh}
+.works-header .label{color:var(--ink-soft)}
+.works-header h2{font-size:var(--step-h2);margin-top:18px;font-weight:400}
+.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line)}
+.project-card{position:relative;aspect-ratio:16/10;overflow:hidden;cursor:pointer;background:var(--bg)}
+.project-card img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease);filter:brightness(.96)}
+.project-card:hover img{transform:scale(1.04);filter:brightness(1)}
+.card-index{position:absolute;top:22px;left:24px;font-size:var(--step-label);font-weight:500;letter-spacing:.15em;color:#fff;mix-blend-mode:difference;z-index:2}
+.card-scrim{position:absolute;inset:auto 0 0 0;padding:70px 26px 24px;background:linear-gradient(to top,rgba(255,255,255,.94) 0%,rgba(255,255,255,0) 100%)}
+.card-name{font-size:clamp(20px,2.6vw,30px);font-weight:400;letter-spacing:-0.01em}
+.card-loc{font-size:12px;letter-spacing:.08em;color:var(--ink-soft);margin-top:6px}
+.card-type{position:absolute;right:24px;bottom:24px;font-size:var(--step-label);font-weight:500;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--blue);opacity:0;transform:translateY(8px);transition:.5s var(--ease)}
+.project-card:hover .card-type{opacity:1;transform:none}
+.card-underline{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .7s var(--ease)}
+.project-card:hover .card-underline{transform:scaleX(1)}
+
+/* ---------- portfolio thumbnail ---------- */
+.portfolio-card{position:relative;aspect-ratio:16/10;overflow:hidden;cursor:pointer;background:var(--bg);grid-column:1/-1;display:block;width:100%;text-decoration:none;color:inherit}
+.portfolio-card img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.portfolio-card:hover img{transform:scale(1.04)}
+.portfolio-scrim{position:absolute;inset:auto 0 0 0;padding:70px 26px 24px;background:linear-gradient(to top,rgba(255,255,255,.94) 0%,rgba(255,255,255,0) 100%)}
+.portfolio-name{font-size:clamp(20px,2.6vw,30px);font-weight:400;letter-spacing:-0.01em}
+.portfolio-loc{font-size:12px;letter-spacing:.08em;color:var(--ink-soft);margin-top:6px}
+
+/* ---------- immersive ---------- */
+.experience{background:var(--bg-alt);padding:14vh 8%}
+.experience .label{color:var(--ink-soft)}
+.experience h2{font-size:var(--step-h2);font-weight:400;margin:18px 0 7vh}
+
+/* fullscreen time-of-day */
+.tod-fullscreen{position:relative;width:100vw;height:100vh;margin-left:-8vw;overflow:hidden;background:#000}
+.tod-fullscreen .tod-slide{position:absolute;inset:0;opacity:0;transition:opacity 2s var(--ease)}
+.tod-fullscreen .tod-slide.active{opacity:1}
+.tod-fullscreen .tod-slide img{width:100%;height:100%;object-fit:cover}
+.tod-fullscreen .tod-overlay{position:absolute;left:8%;bottom:12%;z-index:2;color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.tod-fullscreen .tod-name{font-size:clamp(40px,6vw,72px);font-weight:400;text-transform:uppercase;letter-spacing:.08em;line-height:1}
+.tod-fullscreen .tod-temp{font-size:14px;letter-spacing:.2em;margin-top:12px;opacity:.9}
+
+.tours-block{margin-top:12vh}
+.tours-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px}
+.tour-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tour-tab{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 20px;border-radius:30px;
+  font:inherit;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.3s}
+.tour-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.tour-actions{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap}
+.tour-caption{margin-top:16px;font-size:13px;color:var(--ink-soft);letter-spacing:.05em}
+.ar-feature{display:grid;grid-template-columns:1.1fr 1fr;gap:5vw;margin-top:12vh;align-items:center}
+.ar-feature .ar-img{border-radius:4px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/11}
+.ar-feature .ar-img img{width:100%;height:100%;object-fit:cover}
+.ar-copy .label{color:var(--ink-soft)}
+.ar-copy h3{font-size:var(--step-h3);font-size:clamp(26px,3vw,38px);font-weight:400;margin:16px 0 18px}
+.ar-actions{display:flex;gap:20px;align-items:center;margin-top:30px;flex-wrap:wrap}
+.pill{display:inline-block;padding:14px 34px;background:var(--blue);color:#fff;text-decoration:none;border-radius:30px;
+  font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;border:0;cursor:pointer;font-family:inherit}
+.qr-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center}
+.qr-card .label{display:block;margin-top:8px;color:var(--ink-soft)}
+#qrbox{width:96px;height:96px;margin:0 auto}
+#qrbox img,#qrbox canvas{display:block;width:100%!important;height:100%!important}
+
+/* ---------- materials ---------- */
+.materials{position:relative;height:600vh;background:var(--bg)}
+.mat-stage{position:sticky;top:0;height:100vh;display:flex;overflow:hidden}
+.mat-canvas-wrap{position:relative;width:55%;height:100%}
+#matCanvas{position:absolute;inset:0;width:100%;height:100%}
+.mat-chip{position:absolute;top:26px;left:26px;display:flex;align-items:center;gap:12px;z-index:3}
+.mat-intro{position:absolute;top:70px;left:26px;z-index:3;max-width:400px;font-size:clamp(14px,1.5vw,18px);line-height:1.6;color:var(--ink-soft);font-weight:300}
+.mat-chip .chip{background:var(--blue);color:#fff;padding:6px 14px;border-radius:20px;font-size:10px;font-weight:500;letter-spacing:.15em}
+.mat-chip .idx{font-size:11px;letter-spacing:.15em;color:var(--ink-soft)}
+#matRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(74%,520px);height:auto;z-index:1;pointer-events:none}
+.mat-tagcard{position:absolute;right:26px;bottom:34px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:12px 16px;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.mat-name-wrap{position:absolute;left:26px;bottom:34px;z-index:3;max-width:calc(100% - 320px);overflow:hidden;height:1.12em}
+#matName{font-size:clamp(24px,3.4vw,56px);font-weight:500;line-height:1.06;letter-spacing:-0.02em;white-space:nowrap;color:var(--ink);display:block;transition:transform .5s var(--ease)}
+#matName.swap{transform:translateY(-110%)}
+.mat-rail{position:absolute;right:0;top:0;width:45%;height:100%;pointer-events:none}
+.mat-block{position:absolute;right:8vw;width:min(30vw,380px);opacity:.28;transform:translateY(-50%);transition:opacity .5s var(--ease)}
+.mat-block.active{opacity:1}
+.mat-block .label{color:var(--ink-soft)}
+.mat-block h3{font-size:clamp(28px,3.5vw,44px);font-weight:500;letter-spacing:-0.02em;line-height:1.1;margin:12px 0 6px}
+.mat-block .tone{font-size:12px;letter-spacing:.1em;color:var(--blue);margin-bottom:14px}
+.mat-block p{font-size:14px;line-height:1.7;color:var(--ink-soft)}
+.mat-cards{display:none}
+.materials.static{height:auto;padding:14vh 0}
+.materials.static .mat-stage,.materials.static .mat-rail{display:none}
+.materials.static .mat-cards{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 8vw 20px}
+.mat-card{scroll-snap-align:start;flex:0 0 78vw;max-width:340px;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.mat-card canvas{width:100%;aspect-ratio:4/3;display:block}
+.mat-card .pad{padding:20px}
+.mat-card h3{font-size:20px;font-weight:400;margin:10px 0 4px}
+.mat-card .tone{font-size:11px;letter-spacing:.1em;color:var(--blue);margin-bottom:10px}
+.mat-card p{font-size:13px;line-height:1.65;color:var(--ink-soft)}
+
+/* ---------- philosophy ---------- */
+.philosophy{background:var(--bg-alt);padding:16vh 8%}
+.philosophy-header{text-align:center;margin-bottom:10vh}
+.philosophy-header .label{color:var(--ink-soft)}
+.philosophy-header h2{font-size:var(--step-h2);font-weight:400;margin-top:18px;text-transform:none}
+.principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6vw;max-width:1400px;margin:0 auto}
+.principle-num{font-size:14px;font-weight:400;color:var(--blue);letter-spacing:.1em;margin-bottom:26px}
+.principle h3{font-size:22px;font-weight:400;line-height:1.3;margin-bottom:20px}
+.principle p{font-size:14px;line-height:1.9;color:var(--ink-soft)}
+
+/* ---------- footer ---------- */
+.footer{background:var(--bg);padding:18vh 8vw 40px;border-top:1px solid var(--line);text-align:center}
+.footer h2{font-size:var(--step-h2);font-weight:400;font-stretch:125%;max-width:16ch;margin:0 auto 40px}
+.footer-row{display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;
+  border-top:1px solid var(--line);padding-top:30px;margin-top:12vh;font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
+.footer-row a{color:var(--ink);text-decoration:none;transition:color .3s}
+.footer-row a:hover{color:var(--blue)}
+
+/* ---------- modal + lightbox ---------- */
+.project-modal{position:fixed;inset:0;background:rgba(255,255,255,.98);z-index:1000;display:none;overflow-y:auto}
+.project-modal.active{display:block}
+.modal-content{max-width:1400px;margin:0 auto;padding:40px 4vw 80px}
+.modal-close{position:fixed;top:26px;right:4vw;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+  background:#fff;color:var(--ink);font-size:22px;font-weight:300;cursor:pointer;z-index:1001;font-family:inherit}
+.modal-title{font-size:clamp(34px,5vw,56px);font-weight:400;letter-spacing:-0.02em}
+.modal-location{color:var(--ink-soft);font-size:13px;letter-spacing:.15em;text-transform:uppercase;margin:14px 0 60px}
+.modal-heading{font-size:var(--step-label);font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);
+  padding-top:16px;border-top:2px solid var(--blue);display:inline-block;margin-bottom:30px}
+.ov-group{margin-bottom:80px}
+.ov-carousel{position:relative;width:100%;height:66vh;overflow:hidden;border-radius:4px;border:1px solid var(--line)}
+.ov-slide{position:absolute;inset:0;opacity:0;transition:opacity .5s var(--ease)}
+.ov-slide.active{opacity:1}
+.ov-slide img{width:100%;height:100%;object-fit:cover}
+.ov-text{position:absolute;left:0;right:0;bottom:0;padding:60px 36px 32px;z-index:2;
+  background:linear-gradient(to top,rgba(255,255,255,.96) 0%,rgba(255,255,255,0) 100%)}
+.ov-text h4{font-size:13px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.ov-text p{font-size:15px;line-height:1.75;max-width:680px;color:var(--ink)}
+.ov-nav{display:flex;justify-content:center;align-items:center;gap:18px;padding:14px 0}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--blue);background:#fff;color:var(--blue);
+  font-size:18px;cursor:pointer;transition:.3s;font-family:inherit}
+.nav-btn:hover{background:var(--blue);color:#fff}
+.ov-counter{font-size:12px;letter-spacing:.1em;color:var(--ink-soft);min-width:44px;text-align:center}
+.construction{margin-top:34px;padding-top:30px;border-top:1px solid var(--line)}
+.construction .label{display:block;color:var(--ink-soft);margin-bottom:18px}
+.construction img{max-width:640px;width:100%;border:1px solid var(--line);border-radius:4px}
+.full-gallery{margin-top:80px}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:30px}
+.gallery-item{aspect-ratio:16/9;overflow:hidden;border-radius:4px;border:1px solid var(--line)}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.gallery-item:hover img{transform:scale(1.05)}
+@media (max-width:768px){.gallery-grid{grid-template-columns:1fr}}
+.video-container{width:100%;height:64vh;overflow:hidden;border-radius:4px;border:1px solid var(--line);background:#000;position:relative}
+.modal-video{width:100%;height:100%;object-fit:contain;transform:rotate(-90deg)}
+.modal-actions{display:flex;gap:14px;margin:-30px 0 60px;flex-wrap:wrap}
+.ghost-btn{display:inline-block;padding:12px 26px;border:1px solid var(--blue);color:var(--blue);background:#fff;border-radius:30px;
+  font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-decoration:none;font-family:inherit;transition:.3s}
+.ghost-btn:hover{background:var(--blue);color:#fff}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1100;display:none}
+.lightbox.active{display:block}
+.lightbox iframe{position:absolute;inset:4vh 4vw;width:92vw;height:92vh;border:0}
+.lightbox-close{position:absolute;top:20px;right:26px;background:none;border:0;color:#fff;font-size:34px;cursor:pointer;font-family:inherit}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .projects-grid{grid-template-columns:1fr}
+  .about{grid-template-columns:1fr;padding:12vh 8vw;gap:60px}
+  .about-card{right:0}
+  .ar-feature{grid-template-columns:1fr}
+  .principles-grid{grid-template-columns:1fr;gap:60px}
+}
+@media (max-width:767px){
+  .nav-links{display:none}
+  .menu-toggle{display:block}
+  .tod-fullscreen .tod-overlay{left:20px;bottom:18px}
+  .ov-text{padding:40px 18px 18px}
+  .video-container{height:56vw}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  [data-reveal]{opacity:1;transform:none;transition:none}
+  .about-marquee span{animation:none}
+  .scroll-cue .cue-line{animation:none}
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a class="nav-logo" href="#top">MANTON</a>
+  <div class="nav-links">
+    <a href="#about">About</a><a href="#work">Work</a><a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener">Portfolio</a><a href="#experience">Experience</a><a href="#materials">Materials</a><a href="#contact">Contact</a>
+  </div>
+  <button class="menu-toggle" id="menuToggle" aria-label="Open menu">Menu</button>
+</nav>
+<div class="menu-overlay" id="menuOverlay">
+  <button class="menu-close" id="menuClose" aria-label="Close menu">Close</button>
+  <a href="#about">About</a><a href="#work">Work</a><a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener">Portfolio</a><a href="#experience">Experience</a><a href="#materials">Materials</a><a href="#contact">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-sticky">
+    <img src="overcastinteriorrender.png" alt="Overcast interior render" class="hero-image" id="imageCool" fetchpriority="high">
+    <img src="lighting interiorrender.png" alt="Interior in warm lighting" class="hero-image" id="imageWarm">
+    <div class="hero-shade"></div>
+    <div class="hero-content">
+      <div class="hero-logo-wrap">
+        <img src="manton-navy-logo.png" alt="Manton" class="hero-logo" id="heroLogo">
+        <span class="hero-wordmark" id="heroWordmark">MANTON</span>
+      </div>
+      <div class="hero-subtitle label">Architecture for a Brighter Tomorrow</div>
+      <p class="hero-description">Crafting monolithic private residences and curated illumination environments. Translating natural daylight and twilight warmth into spatial poetry.</p>
+    </div>
+    <div class="scroll-cue"><span class="cue-line"></span><span class="label">Scroll to explore</span></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div>
+    <div class="about-name" data-reveal>Hi there,</div>
+    <h2 class="about-statement" data-reveal>Antony Chege.It looks like you've landed on my portfolio.Im delighted to welcome you to my oeuvre.</h2>
+    <div class="about-welcome" data-reveal>
+      <span class="star">*</span>
+      <p class="body-text">Whether you are planning a family home, a hospitality venture, or just collecting inspiration, welcome. Every project here was drawn, modeled, and rendered by me in Nairobi.</p>
+    </div>
+  </div>
+  <div class="about-visual" data-reveal>
+    <div class="about-marquee"><span id="marqueeSpan">MONOLITHIC RESIDENCES — CURATED LIGHT — NAIROBI — MONOLITHIC RESIDENCES — CURATED LIGHT — NAIROBI — </span></div>
+    <div class="portrait-frame">
+      <div class="portrait-initials">AC</div>
+      <img src="portrait.jpeg" alt="Portrait of Antony Chege" id="portraitImg">
+    </div>
+    <div class="about-card">
+      <img src="project1.jpg" alt="Villa Intime">
+      <span class="label">Villa Intime — Kiambu</span>
+    </div>
+  </div>
+</section>
+
+<!-- SELECTED WORKS -->
+<section class="works" id="work">
+  <div class="works-header" data-reveal>
+    <div class="label">Selected Works</div>
+    <h2>A selection of my works</h2>
+  </div>
+  <div class="projects-grid" id="projectsGrid"></div>
+  
+  <!-- PORTFOLIO THUMBNAIL -->
+  <a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener" class="portfolio-card" data-reveal>
+    <img src="portfolio-cover.jpg" alt="Portfolio" loading="lazy">
+    <div class="portfolio-scrim">
+      <div class="portfolio-name">Full Portfolio</div>
+      <div class="portfolio-loc">Click to view complete works</div>
+    </div>
+  </a>
+</section>
+
+<!-- IMMERSIVE EXPERIENCE -->
+<section class="experience" id="experience">
+  <div data-reveal>
+    <div class="label">Immersive</div>
+    <h2>Walk through the light</h2>
+  </div>
+
+  <!-- FULLSCREEN TIME-OF-DAY -->
+  <div class="tod-fullscreen" id="todFullscreen">
+    <div class="tod-slide active"><img src="morning-render.jpg" alt="Morning light study" loading="lazy"><div class="tod-overlay"><div class="tod-name">Morning</div><div class="tod-temp">06:00 · FIRST LIGHT</div></div></div>
+    <div class="tod-slide"><img src="midday-render.jpg" alt="Midday light study" loading="lazy"><div class="tod-overlay"><div class="tod-name">Midday</div><div class="tod-temp">12:00 · PEAK SUN</div></div></div>
+    <div class="tod-slide"><img src="golden-hour-render.jpg" alt="Golden hour light study" loading="lazy"><div class="tod-overlay"><div class="tod-name">Golden Hour</div><div class="tod-temp">18:00 · WARMTH</div></div></div>
+    <div class="tod-slide"><img src="night-render.jpg" alt="Night illumination study" loading="lazy"><div class="tod-overlay"><div class="tod-name">Night</div><div class="tod-temp">22:00 · ILLUMINATION</div></div></div>
+  </div>
+
+  <div class="tours-block" data-reveal>
+    <div class="tours-label">
+      <span class="label">360° Tours</span>
+      <span class="label" style="color:var(--ink-soft)">Select a project below</span>
+    </div>
+    <div class="tour-tabs" id="tourTabs"></div>
+    <div class="tour-actions">
+      <a id="tourBtn" class="ghost-btn" href="#" target="_blank" rel="noopener" style="display:none">Open 360° Tour ↗</a>
+      <span id="tourHint" class="label" style="color:var(--ink-soft)">Select a project above</span>
+    </div>
+    <div class="tour-caption" id="tourCaption"></div>
+  </div>
+
+  <div class="ar-feature" data-reveal>
+    <div class="ar-img"><img src="project1.jpg" alt="Villa Intime" loading="lazy"></div>
+    <div class="ar-copy">
+      <div class="label">Augmented Reality</div>
+      <h3>Place it on your site</h3>
+      <p class="body-text">Scan the code with your phone — or open the scene directly — and the Villa Intime model appears in your space, slowly rotating so you can walk around it.</p>
+      <div class="ar-actions">
+        <a class="pill" id="arBtn" href="https://www.kivicube.com/scenes-beta/enf6rWG9JBNzpzSLKdiXafzFn9xmKSPJ" target="_blank" rel="noopener">View in AR</a>
+        <div class="qr-card"><div id="qrbox"></div><span class="label">Scan QR to open AR</span></div>
+        <div class="qr-card"><img src="AR-logo.jpg" alt="Scan for AR" style="width:96px;height:96px;object-fit:cover"><span class="label">Scan logo for AR</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATERIALS (3D showcase) -->
+<section class="materials" id="materials">
+  <div class="mat-stage" id="matStage">
+    <div class="mat-canvas-wrap">
+      <svg id="matRing" viewBox="0 0 400 400" aria-hidden="true"></svg>
+      <canvas id="matCanvas"></canvas>
+      <div class="mat-chip"><span class="chip">MATERIALS</span><span class="idx" id="matIdx">01 / 06</span></div>
+      <p class="mat-intro">Discover the tactile harmonies and bespoke materials shaping these interior spaces.</p>
+      <div class="mat-tagcard">MANTON — Sensory Archive</div>
+      <div class="mat-name-wrap"><h2 id="matName">French Rift Oak</h2></div>
+    </div>
+    <div class="mat-rail" id="matRail"></div>
+  </div>
+  <div class="mat-cards" id="matCards"></div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="philosophy">
+  <div class="philosophy-header" data-reveal>
+    <div class="label">Atelier Philosophy</div>
+    <h2>Three Principles of Form &amp; Radiance</h2>
+  </div>
+  <div class="principles-grid">
+    <div class="principle" data-reveal><div class="principle-num">01</div><h3>The Dialogue of Twilight</h3><p>We design for the liminal hour when exterior daylight surrenders to interior warmth.</p></div>
+    <div class="principle" data-reveal><div class="principle-num">02</div><h3>Indirect Illumination as Structure</h3><p>Light is not an accessory applied after construction. It is a spatial material sculpted simultaneously with concrete and wood.</p></div>
+    <div class="principle" data-reveal><div class="principle-num">03</div><h3>Permanence Through Honesty</h3><p>We reject transient trends in favor of natural materials that record time with grace.</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="contact">
+  <h2 data-reveal>Let's build something permanent.</h2>
+  <a class="pill" href="mailto:chegeantony74@gmail.com" data-reveal>Start a commission</a>
+  <div class="footer-row">
+    <span>© 2026 Manton Enterprises</span>
+    <span>Nairobi, Kenya</span>
+    <a href="tel:+254792003373">+254 792 003 373</a>
+    <a href="mailto:chegeantony74@gmail.com">chegeantony74@gmail.com</a>
+    <a href="https://instagram.com/mantonenterprise" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://tiktok.com/@antony.chege21" target="_blank" rel="noopener">TikTok</a>
+    <a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener">Portfolio PDF</a>
+  </div>
+</footer>
+
+<!-- PROJECT MODAL -->
+<div class="project-modal" id="projectModal" role="dialog" aria-modal="true">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close project">×</button>
+    <div class="modal-body">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <p class="modal-location" id="modalLocation"></p>
+      <div class="modal-actions" id="modalActions"></div>
+      <div id="overlayGallery"></div>
+      <div style="margin-top:40px"><span class="modal-heading">Walkthrough</span></div>
+      <div class="video-container"><video class="modal-video" id="modalVideo" autoplay muted loop playsinline controls></video></div>
+    </div>
+  </div>
+</div>
+
+<!-- 360 LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close tour">×</button>
+  <iframe id="lightboxFrame" allowfullscreen title="360 tour"></iframe>
+</div>
+
+<script>
+/* ================================================================
+   CONFIG
+================================================================ */
+const CONFIG = {
+  panoeeTours: {
+    'villa-intime': 'https://virto360.com/share/3d78ade83e716969990f',
+    'kitengela-hearth': 'https://virto360.com/share/aefec3c54ddfa28a42b4',
+    'kerarapon-villa': 'https://virto360.com/share/306ee9e80925a23e5605',
+    'chevron-hotel': 'https://virto360.com/share/ca1fade19e5e6e747df0',
+    '9021-terrace': 'https://virto360.com/share/b3e862036bbed95e80c1',
+    'migaa-golf': 'https://virto360.com/share/55d098400b4aaee97ecf',
+    'buffalo-rd-court': 'https://virto360.com/share/1e9f46ca472b62d6c928',
+    'thika-greens': 'https://virto360.com/share/98dbb3712e5996ab633a'
+  },
+  arLinks: {
+    'villa-intime': 'https://www.kivicube.com/scenes-beta/enf6rWG9JBNzpzSLKdiXafzFn9xmKSPJ'
+  }
+};
+
+/* ================================================================
+   PROJECTS
+================================================================ */
+const PROJECTS = [
+  { id:'villa-intime', name:'Villa Intime', type:'Residential · 2026', loc:'Kiambu, Kenya',
+    location:'Jogoo Estate, Thikagatura Rd, Kiambu, Kenya', video:'villa-intime/hero-video.mp4',
+    groups:[
+      { heading:'Design Concept', text:'Designed for a standard 50 by 100ft urban plot, this project focuses on providing all the functional spaces and luxuries of a typical expansive mansion while keeping the overall built footprint low i.e. restricted to 2 stories. The program is specifically tailored for multigenerational family living.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Dual Master Configuration', text:'The house has dual master bedroom configuration, which includes two full master bedrooms, one on the ground floor and one on the upper floor, specifically planned to comfortably accommodate aging parents or visiting in-laws without forcing them to navigate stairs.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Inward Facing Privacy', text:'The house turns inward away from surrounding plot boundaries. The front yard is reserved strictly for utility operations and parking, the mid section is where the common spaces are located whereas the private backyard is oriented around a family swimming pool and outdoor leisure zone.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Concealed Rooftop & Construction', text:'A concealed rooftop terrace is engineered to remain hidden from street level, preserving the low-rise residential profile and skyline of the surrounding neighborhood.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'], construction:'construction-photo.jpg' }
+    ]},
+  { id:'9021-terrace', name:'9021 Terrace', type:'Residential · 2026', loc:'Kiambu, Kenya',
+    location:'Murram Estate, Kenyatta Road, Kiambu, Kenya', video:'9021-terrace/hero-video.mp4',
+    groups:[
+      { heading:'Design Concept', text:'This residential design project addresses the critical challenge of optimizing spatial, structural, and operational efficiency on an exceptionally tight 25 x 50 ft urban plot. To balance built area with open-air amenities, the main building footprint is restricted to 25 x 40 ft, deliberately setting back the structure to leave a dedicated 10 ft rear yard for private family outdoor space.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Open-Plan Configuration', text:'The ground floor layout prioritizes uninterrupted visual lines and spatial fluidness by combining the living, dining, and kitchen (LDK) functions into an open-plan configuration. This strategy eliminates unnecessary internal partition walls, maximizing daylight penetration and natural ventilation through the central core.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Space-Saving Solutions', text:'To resolve severe interior floor space limitations within the individual bedrooms, the design relies heavily on custom wall-mounted joinery. All major furniture pieces, including wardrobes, study desks, side tables, and foldable bed systems, are suspended or mounted directly onto vertical wall surfaces.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'EPS Structural System', text:'Structurally, the project incorporates expanded polystyrene (EPS) panels for both the floor slab construction and primary wall elements. Using EPS technology significantly reduces the dead load of the building, speeds up structural erection times, provides superior thermal and acoustic insulation performance, and optimizes cost efficiency compared to traditional masonry systems.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'buffalo-rd-court', name:'Buffalo Rd Court', type:'Residential · 2025', loc:'Nakuru, Kenya',
+    location:'Buffalo Rd, Naivasha, Kenya', video:'buffalo-rd-court/hero-video.mp4',
+    groups:[
+      { heading:'Project Overview', text:'The Buffalo Road Housing project located along Buffalo Road near Lake Naivasha aims to integrate a private residential community harmoniously into its natural surroundings, maintaining a balance between secure micro-density and quiet living quality.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Linear Living Layout', text:'The architectural intent is based on creating a linear living layout that meets both the spatial efficiency required for multi-unit housing and the desires for privacy and open-air connectivity. The project organizes six 2-bedroom homes alongside a primary 3-bedroom anchor unit.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Community Integration', text:'Centralized pedestrian pathways, dedicated parking nodes, and lush perimeter green buffers guide circulation across the site. The goal was to develop a refined gated scheme that fosters close-knit community interaction while offering a calm retreat along the Lake Naivasha corridor.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Spatial Organization', text:'The spatial footprint and material selection are designed to establish a clear residential spine, organizing the units along a central axis with clear zoning for public and private realms.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'chevron-hotel', name:'Chevron Hotel', type:'Hospitality · 2025', loc:'Mombasa, Kenya',
+    location:'Mtwapa, Kilifi, Kenya', video:'chevron-hotel/hero-video.mp4',
+    groups:[
+      { heading:'Urban Infill Challenge', text:'The Urban Infill Hotel addressed the extreme spatial, environmental, and daylighting challenges of high-rise residential design on a 1/8-acre site in the coastal area of Mtwapa, Kilifi county. Sandwiched tightly between two existing multi-storey structures with zero side window access, the design squeezes two distinct room typologies, conference facilities, a public restaurant, a swimming pool, and structured basement parking into a dense vertical envelope.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Chevron Facade System', text:'The defining architectural feature of the primary front elevation is a vertical stack of alternating chevron (V-shaped) balconies across four bay sections. The facade alternates floor-by-floor between timber louvered privacy screens and full-glass balustrades, giving the building a dynamic geometric identity while balancing solar shading and visual privacy.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Inward-Focused Orientation', text:'Because adjacent structures block all side views, the hotel turns completely inward toward a deep central atrium light void. Guest rooms open up to this central shaft, which is anchored at the ground floor by a raised swimming pool acting as an artificial visual focal point.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Competition Recognition', text:'Submitted for the Inspirelli Architectural competition, the project demonstrates radical problem-solving techniques for landlocked parcels, transforming severe constraints into architectural features through innovative vertical planning and facade design.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'migaa-golf', name:'Migaa Golf Estate', type:'Residential · 2023', loc:'Kiambu County, Kenya',
+    location:'Migaa Golf Estate, Kiambu County, Kenya', video:'migaa-golf/hero-video.mp4',
+    groups:[
+      { heading:'Steep-Site Strategy', text:'This residential project involved the design of a 5-bedroom maisonette situated on a severely sloped site with a +2m vertical rise over a 13m horizontal run. Instead of executing extensive cut-and-fill operations, the architectural response works directly with the natural topography, utilizing a stepped structural approach.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Split-Level Design', text:'The design integrates a reinforced concrete retaining wall to stabilize the slope, giving rise to a split-level arrangement featuring both a lower ground floor and an upper ground floor. The spatial program leverages the site elevation changes to establish clear functional zoning and privacy gradations.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Functional Zoning', text:'The lower ground floor houses service zones and private recreational areas that open directly onto the lower garden level, while the upper ground floor contains the main entrance, living, dining, and kitchen areas.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Panoramic Views', text:'The upper level accommodates the primary sleeping quarters, including an ensuite master suite positioned to take advantage of panoramic views across the estate. Technical outcomes focused on steep-slope site planning, retaining wall design and waterproofing integration, split-level floor plate coordination, and topographical structural design.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'thika-greens', name:'Thika Greens', type:'Residential · 2023', loc:'Muranga, Kenya',
+    location:'Thika Greens Estate, Muranga, Kenya', video:'thika-greens/hero-video.mp4',
+    groups:[
+      { heading:'Classical Proportions', text:'Set within the secure perimeter of Thika Greens Estate, this luxury residence is an exercise in classical proportions adapted for contemporary living. The two-story, five-bedroom villa occupies a full acre, allowing the architecture to establish a commanding presence while maintaining an organic connection to its surrounding grounds.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Neoclassical Facade', text:'The exterior facade relies on symmetrical order, polished rusticated plasterwork, and grand multi-story columns that frame the central entrance portico. Deeply set windows, decorative cornices, and refined balustrades pay homage to neoclassical tradition, elevated by high-performance glazing and integrated low-voltage accent lighting.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Interior Grandeur', text:'Inside, the ground floor opens into a double-height grand foyer with a sweeping curved staircase, immediately establishing the residence\'s scale. The layout separates formal entertaining venues from private family spaces, featuring an expansive formal living salon, a secondary family lounge, a chef\'s kitchen with custom cabinetry, and a dedicated en-suite guest wing.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Landscape Integration', text:'The surrounding acre is developed as an extension of the interior living space. Formal parterre gardens, manicured lawn terraces, and outdoor pavilion seating surround a perimeter infinity pool, creating clear axial vistas from every major living room across the landscaped grounds.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'kerarapon-villa', name:'Kerarapon Villa', type:'Residential · 2026', loc:'Nairobi, Kenya',
+    location:'Kerarapon, Nairobi, Kenya', video:'kerarapon-villa/hero-video.mp4',
+    groups:[
+      { heading:'Modernist Composition', text:'Located on the sloped terrain of Kerarapon, The Navy Residence is a two-story, five-bedroom modernist home defined by geometric form and an expressive interior palette. The architectural structure features sharp horizontal cantilevers, smooth concrete finishes, and expansive floor-to-ceiling glass assemblies that capture views of the surrounding green canopy.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Navy Interior Identity', text:'The residence takes its name from its distinctive interior identity, where deep navy blue serves as the foundational anchor. Navy wall panels, bespoke millwork, and accent surfaces create an intimate atmosphere, balanced by rich timber ceilings, exposed stone feature walls, and matte black steel fixtures.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Spatial Arrangement', text:'The spatial arrangement uses an open floor plan on the ground level, connecting the main living area, dining zone, and minimalist kitchen. Floating stair treads backed by glass guardrails lead to the upper level, where four primary bedroom suites—including a master suite with a private cantilevered balcony—overlook the double-height void below.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Indoor-Outdoor Connection', text:'Large glass doors slide away to erase the boundary between the interior living space and an elevated timber deck. Warm exterior cedar cladding and perimeter planters integrate the house into its wooded site context, contrasting with the bold, dark tones of the internal design.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]},
+  { id:'kitengela-hearth', name:'Kitengela Hearth', type:'Residential · 2025', loc:'Kajiado, Kenya',
+    location:'Kitengela, Kajiado, Kenya', video:'kitengela-hearth/hero-video.mp4',
+    groups:[
+      { heading:'Climate-Conscious Design', text:'Situated in the arid landscape of Kitengela, this three-bedroom bungalow reimagines traditional neoclassical motifs through a grounded, climate-conscious palette. Designed as a single-story residence, the house balances classic symmetry with a low-slung, horizontal profile that anchors it into the savanna environment.', images:['render-01.jpg','render-02.jpg','render-03.jpg','render-04.jpg'] },
+      { heading:'Earthy Material Palette', text:'The exterior replaces crisp white neoclassical finishes with an earthy color palette featuring warm sand renders, textured local stone cladding, and terracotta roof tiles. Porticos and molded architraves are simplified into clean, linear geometries, retaining formal balance while avoiding excessive ornamentation.', images:['render-05.jpg','render-06.jpg','render-07.jpg','render-08.jpg'] },
+      { heading:'Passive Cooling Strategy', text:'The internal planning organizes around an open-plan central living and dining spine that opens onto a deeply shaded rear veranda. Large sliding doors and high-level clerestory windows encourage cross-ventilation, shielding the interior from afternoon heat while filling the space with diffused natural light and soft, warm tones.', images:['render-09.jpg','render-10.jpg','render-11.jpg','render-12.jpg'] },
+      { heading:'Xeriscape Integration', text:'The surrounding site design emphasizes native xeriscaping, combining drought-tolerant flora, gravel pathways, and natural stone paving. This low-maintenance landscape frame maintains a cohesive aesthetic connection between the architecture and its local context.', images:['render-13.jpg','render-14.jpg','render-15.jpg','render-16.jpg'] }
+    ]}
+];
+PROJECTS.forEach(p => {
+  p.tour360 = CONFIG.panoeeTours[p.id] || '';
+  p.arLink  = CONFIG.arLinks[p.id] || '';
+});
+
+/* ================================================================
+   NAV + MENU
+================================================================ */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('visible', scrollY > innerHeight * 0.6), {passive:true});
+const menuOverlay = document.getElementById('menuOverlay');
+document.getElementById('menuToggle').onclick = () => menuOverlay.classList.add('open');
+document.getElementById('menuClose').onclick = () => menuOverlay.classList.remove('open');
+menuOverlay.querySelectorAll('a').forEach(a => a.onclick = () => menuOverlay.classList.remove('open'));
+
+document.getElementById('heroLogo').addEventListener('error', function(){
+  this.style.display = 'none';
+  document.getElementById('heroWordmark').style.display = 'block';
+});
+document.getElementById('portraitImg').addEventListener('error', function(){ this.remove(); });
+
+/* ================================================================
+   HERO crossfade
+================================================================ */
+const imageCool = document.getElementById('imageCool');
+const imageWarm = document.getElementById('imageWarm');
+addEventListener('scroll', () => {
+  imageWarm.style.opacity = Math.min(scrollY / innerHeight, 1);
+}, {passive:true});
+
+/* ================================================================
+   REVEALS
+================================================================ */
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const revealIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      setTimeout(() => el.classList.add('revealed'), (el.dataset.stagger || 0) * 80);
+      revealIO.unobserve(el);
+    }
+  });
+}, {threshold: .15});
+function bindReveals(scope = document){
+  scope.querySelectorAll('[data-reveal]:not(.bound)').forEach((el, i) => {
+    el.classList.add('bound');
+    el.dataset.stagger = i % 4;
+    if (reduced) el.classList.add('revealed'); else revealIO.observe(el);
+  });
+}
+bindReveals();
+
+/* ================================================================
+   WORKS GRID + MODAL
+================================================================ */
+const grid = document.getElementById('projectsGrid');
+PROJECTS.forEach((p, i) => {
+  const card = document.createElement('article');
+  card.className = 'project-card';
+  card.setAttribute('data-reveal','');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('role','button');
+  card.setAttribute('aria-label', 'Open ' + p.name);
+  card.innerHTML =
+    '<span class="card-index">' + String(i+1).padStart(2,'0') + '</span>' +
+    '<img src="project' + (i+1) + '.jpg" alt="' + p.name + ' — ' + p.loc + '" loading="lazy">' +
+    '<div class="card-scrim"><div class="card-name">' + p.name + '</div><div class="card-loc">' + p.loc + '</div></div>' +
+    '<span class="card-type">' + p.type + '</span><span class="card-underline"></span>';
+  card.addEventListener('click', () => openModal(p.id));
+  card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(p.id); } });
+  grid.appendChild(card);
+});
+bindReveals(grid);
+
+const modal = document.getElementById('projectModal');
+function openModal(id){
+  const p = PROJECTS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = p.name;
+  document.getElementById('modalLocation').textContent = p.location;
+
+  const actions = document.getElementById('modalActions');
+  actions.innerHTML = '';
+  if (p.tour360) {
+    const a = document.createElement('a');
+    a.className = 'ghost-btn';
+    a.textContent = '360° Tour ↗';
+    a.href = p.tour360;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    actions.appendChild(a);
+  }
+  if (p.arLink) {
+    const a = document.createElement('a');
+    a.className = 'ghost-btn';
+    a.textContent = 'View in AR';
+    a.href = p.arLink;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    actions.appendChild(a);
+  }
+
+  const video = document.getElementById('modalVideo');
+  video.src = p.video;
+  video.poster = 'project' + (PROJECTS.indexOf(p)+1) + '.jpg';
+
+  renderGroups(p);
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  modal.scrollTop = 0;
+}
+function closeModal(){
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  const video = document.getElementById('modalVideo');
+  video.pause(); video.removeAttribute('src'); video.load();
+}
+function renderGroups(p){
+  const gallery = document.getElementById('overlayGallery');
+  gallery.innerHTML = '';
+  p.groups.forEach(g => {
+    const group = document.createElement('div');
+    group.className = 'ov-group';
+    let slidesHtml = '';
+    g.images.forEach((img, i) => {
+      slidesHtml += '<div class="ov-slide' + (i===0 ? ' active' : '') + '"><img src="' + p.id + '/' + img + '" alt="' + p.name + ' — ' + g.heading + '" loading="lazy"></div>';
+    });
+    group.innerHTML =
+      '<span class="modal-heading">' + g.heading + '</span>' +
+      '<div class="ov-carousel">' + slidesHtml +
+        '<div class="ov-text"><h4>' + g.heading + '</h4><p>' + g.text + '</p></div>' +
+      '</div>' +
+      '<div class="ov-nav"><button class="nav-btn" aria-label="Previous image">‹</button>' +
+      '<span class="ov-counter">1 / ' + g.images.length + '</span>' +
+      '<button class="nav-btn" aria-label="Next image">›</button></div>' +
+      (g.construction ? '<div class="construction"><span class="label">Current Construction Progress</span><img src="' + p.id + '/' + g.construction + '" alt="' + p.name + ' construction progress" loading="lazy"></div>' : '');
+
+    const slides = group.querySelectorAll('.ov-slide');
+    const counter = group.querySelector('.ov-counter');
+    let cur = 0;
+    const show = n => {
+      slides[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active');
+      counter.textContent = (cur+1) + ' / ' + slides.length;
+    };
+    const btns = group.querySelectorAll('.nav-btn');
+    btns[0].onclick = () => show(cur - 1);
+    btns[1].onclick = () => show(cur + 1);
+    gallery.appendChild(group);
+  });
+  
+  const fullGallery = document.createElement('div');
+  fullGallery.className = 'full-gallery';
+  fullGallery.innerHTML = '<span class="modal-heading">Project Gallery</span><div class="gallery-grid">';
+  p.groups.forEach(g => {
+    g.images.forEach(img => {
+      fullGallery.innerHTML += '<div class="gallery-item"><img src="' + p.id + '/' + img + '" alt="' + p.name + ' render" loading="lazy"></div>';
+    });
+  });
+  fullGallery.innerHTML += '</div>';
+  gallery.appendChild(fullGallery);
+}
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeLightbox(); menuOverlay.classList.remove('open'); }
+});
+
+/* ================================================================
+   360 HOME VIEWER
+================================================================ */
+const tourTabs = document.getElementById('tourTabs');
+const tourBtn = document.getElementById('tourBtn');
+const tourHint = document.getElementById('tourHint');
+const tourCaption = document.getElementById('tourCaption');
+const toursAvailable = PROJECTS.filter(p => p.tour360);
+if (toursAvailable.length === 0) {
+  tourTabs.innerHTML = '<span class="label" style="color:var(--ink-soft)">Tours coming soon</span>';
+} else {
+  toursAvailable.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'tour-tab' + (i===0 ? ' active' : '');
+    b.textContent = p.name;
+    b.onclick = () => {
+      tourTabs.querySelectorAll('.tour-tab').forEach(t => t.classList.remove('active'));
+      b.classList.add('active');
+      tourBtn.href = p.tour360;
+      tourBtn.style.display = 'inline-block';
+      tourHint.style.display = 'none';
+      tourCaption.textContent = p.name + ' — ' + p.location;
+    };
+    tourTabs.appendChild(b);
+  });
+}
+function openLightbox(url){
+  document.getElementById('lightboxFrame').src = url;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('active');
+  document.getElementById('lightboxFrame').src = '';
+}
+
+/* ================================================================
+   AR FEATURE CARD
+================================================================ */
+(function(){
+  const url = CONFIG.arLinks['villa-intime'] || '#';
+  const btn = document.getElementById('arBtn');
+  btn.href = url;
+  if (url === '#') btn.addEventListener('click', e => e.preventDefault());
+  if (window.QRCode) {
+    new QRCode(document.getElementById('qrbox'), { text: url, width: 96, height: 96, colorDark: '#002147', colorLight: '#ffffff' });
+  }
+})();
+
+/* ================================================================
+   TIME-OF-DAY — fullscreen seamless crossfade
+================================================================ */
+const todSlides = document.querySelectorAll('.tod-fullscreen .tod-slide');
+let todIndex = 0;
+let todInterval;
+
+function showTod(i){
+  todSlides[todIndex].classList.remove('active');
+  todIndex = (i + todSlides.length) % todSlides.length;
+  todSlides[todIndex].classList.add('active');
+}
+
+function startTodAuto(){
+  todInterval = setInterval(() => showTod(todIndex + 1), 4000);
+}
+
+function stopTodAuto(){
+  clearInterval(todInterval);
+}
+
+document.getElementById('todFullscreen').addEventListener('click', () => {
+  stopTodAuto();
+  showTod(todIndex + 1);
+  startTodAuto();
+});
+
+startTodAuto();
+
+/* ================================================================
+   MATERIALS — procedural textures + scroll-scrubbed 3D
+================================================================ */
+const MATERIALS = [
+  { name:'French Rift Oak',     cat:'Timber & Millwork', tone:'Natural Sand',  desc:'Quarter-sawn boards with a calm, linear grain — used for millwork that wants to disappear into warmth.', tex:'oak' },
+  { name:'Prussian Indigo',     cat:'Wall Finish',       tone:'Deep Mineral',  desc:'A mineral plaster that drinks the light, giving evening rooms their depth.', tex:'indigo' },
+  { name:'Bouclé Wool',         cat:'Textiles',          tone:'Unbleached',    desc:'Looped, undyed wool for seating — soft under lamplight, honest by day.', tex:'boucle' },
+  { name:'Patinated Brass',     cat:'Metal',             tone:'Living Gold',   desc:'Unlacquered brass left to darken — a surface that records touch and time.', tex:'brass' },
+  { name:'Silver Travertine',   cat:'Stone',             tone:'Warm Greige',   desc:'Honed veined travertine for floors that stay cool under the equatorial sun.', tex:'travertine' },
+  { name:'Smoked Eucalyptus',   cat:'Timber',            tone:'Deep Umber',    desc:'Smoked veneer with a fine, dark grain — the quiet anchor of study spaces.', tex:'eucalyptus' }
+];
+
+function texCanvas(kind){
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const x = c.getContext('2d');
+  const rand = (a,b) => a + Math.random() * (b - a);
+  if (kind === 'oak') {
+    x.fillStyle = '#D4C5B0'; x.fillRect(0,0,512,512);
+    for (let y = 0; y < 512; y += 3) {
+      const w = Math.sin(y * 0.05) * 6 + Math.sin(y * 0.013) * 14;
+      x.strokeStyle = 'rgba(120,90,60,' + rand(0.04,0.16) + ')';
+      x.lineWidth = rand(0.6, 2);
+      x.beginPath(); x.moveTo(0, y + w);
+      for (let px = 0; px <= 512; px += 32) x.lineTo(px, y + w + Math.sin(px * 0.02 + y) * 3);
+      x.stroke();
+    }
+    for (let i = 0; i < 5; i++) {
+      const gx = rand(0,512), gy = rand(0,512), r = rand(8,26);
+      const g = x.createRadialGradient(gx,gy,1,gx,gy,r);
+      g.addColorStop(0,'rgba(96,66,40,0.5)'); g.addColorStop(1,'rgba(96,66,40,0)');
+      x.fillStyle = g; x.beginPath(); x.arc(gx,gy,r,0,7); x.fill();
+    }
+  } else if (kind === 'travertine') {
+    x.fillStyle = '#C8B8A0'; x.fillRect(0,0,512,512);
+    let y = 0;
+    while (y < 512) {
+      const h = rand(4, 16);
+      x.fillStyle = 'rgba(' + (170+rand(-25,25)|0) + ',' + (152+rand(-20,20)|0) + ',' + (128+rand(-18,18)|0) + ',' + rand(0.15,0.5) + ')';
+      x.fillRect(0, y, 512, h);
+      y += h;
+    }
+    for (let i = 0; i < 900; i++) {
+      x.fillStyle = 'rgba(90,75,58,' + rand(0.05,0.25) + ')';
+      x.beginPath(); x.ellipse(rand(0,512), rand(0,512), rand(0.5,2.5), rand(0.3,1), rand(0,3), 0, 7); x.fill();
+    }
+  } else if (kind === 'brass') {
+    const g = x.createLinearGradient(0,0,512,0);
+    g.addColorStop(0,'#a87c33'); g.addColorStop(0.35,'#d8ab5e'); g.addColorStop(0.6,'#c4973f'); g.addColorStop(1,'#8f6a2a');
+    x.fillStyle = g; x.fillRect(0,0,512,512);
+    for (let i = 0; i < 420; i++) {
+      const px = rand(0,512);
+      x.strokeStyle = Math.random() < 0.5 ? 'rgba(255,230,170,' + rand(0.03,0.12) + ')' : 'rgba(80,55,15,' + rand(0.03,0.12) + ')';
+      x.lineWidth = rand(0.5, 1.6);
+      x.beginPath(); x.moveTo(px, 0); x.lineTo(px + rand(-6,6), 512); x.stroke();
+    }
+  } else if (kind === 'boucle') {
+    x.fillStyle = '#F5F0E8'; x.fillRect(0,0,512,512);
+    const tones = ['#efe8dc','#e2d9c8','#faf6ee','#d8cdb8','#f0e9dd'];
+    for (let i = 0; i < 5200; i++) {
+      x.fillStyle = tones[(Math.random()*tones.length)|0];
+      const px = rand(0,512), py = rand(0,512), r = rand(1,3.4);
+      x.beginPath(); x.arc(px,py,r,0,7); x.fill();
+      if (Math.random() < 0.3) { x.strokeStyle = 'rgba(120,105,85,0.15)'; x.beginPath(); x.arc(px,py,r+1,rand(0,3),rand(3,6)); x.stroke(); }
+    }
+  } else if (kind === 'indigo') {
+    x.fillStyle = '#2C3E50'; x.fillRect(0,0,512,512);
+    for (let i = 0; i < 160; i++) {
+      const px = rand(0,512), w = rand(6,40);
+      x.fillStyle = 'rgba(255,255,255,' + rand(0.01,0.045) + ')';
+      x.fillRect(px, 0, w, 512);
+    }
+    for (let i = 0; i < 160; i++) {
+      x.fillStyle = 'rgba(0,10,25,' + rand(0.02,0.08) + ')';
+      x.fillRect(rand(0,512), 0, rand(4,26), 512);
+    }
+  } else {
+    x.fillStyle = '#8B7355'; x.fillRect(0,0,512,512);
+    for (let px = 0; px < 512; px += 2) {
+      x.strokeStyle = Math.random() < 0.6 ? 'rgba(60,45,28,' + rand(0.05,0.22) + ')' : 'rgba(190,160,120,' + rand(0.03,0.1) + ')';
+      x.lineWidth = rand(0.5, 1.4);
+      x.beginPath(); x.moveTo(px + rand(-2,2), 0); x.lineTo(px + rand(-3,3), 512); x.stroke();
+    }
+  }
+  return c;
+}
+const TEX_CANVASES = {}; MATERIALS.forEach(m => TEX_CANVASES[m.tex] = texCanvas(m.tex));
+
+const matSection = document.getElementById('materials');
+const matStage = document.getElementById('matStage');
+const matRail = document.getElementById('matRail');
+const matCards = document.getElementById('matCards');
+const matIdxEl = document.getElementById('matIdx');
+const matNameEl = document.getElementById('matName');
+const ringSvg = document.getElementById('matRing');
+
+MATERIALS.forEach((m, i) => {
+  const b = document.createElement('div');
+  b.className = 'mat-block';
+  b.style.top = 'calc(50vh + ' + (i * 88) + 'vh)';
+  b.innerHTML = '<div class="label">' + m.cat + '</div><h3>' + m.name + '</h3><div class="tone">' + m.tone + '</div><p>' + m.desc + '</p>';
+  matRail.appendChild(b);
+});
+const railBlocks = [...matRail.children];
+
+const TICKS = [];
+for (let i = 0; i < 60; i++) {
+  const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l.setAttribute('x1', 200 + Math.cos(a) * 184); l.setAttribute('y1', 200 + Math.sin(a) * 184);
+  l.setAttribute('x2', 200 + Math.cos(a) * 192); l.setAttribute('y2', 200 + Math.sin(a) * 192);
+  l.setAttribute('stroke', 'rgba(0,33,71,0.12)'); l.setAttribute('stroke-width', '2');
+  ringSvg.appendChild(l); TICKS.push(l);
+}
+
+let matState = { index: 0, p: 0 };
+
+function updateRing(p){
+  const lit = Math.round(p * 60);
+  TICKS.forEach((t, i) => t.setAttribute('stroke', i < lit ? '#002147' : 'rgba(0,33,71,0.12)'));
+}
+function updateRail(p){
+  const idx = Math.min(MATERIALS.length - 1, Math.floor(p * MATERIALS.length));
+  railBlocks.forEach((b, i) => b.classList.toggle('active', i === idx));
+}
+function swapName(i){
+  if (reduced) { matNameEl.textContent = MATERIALS[i].name; return; }
+  matNameEl.classList.add('swap');
+  setTimeout(() => { matNameEl.textContent = MATERIALS[i].name; matNameEl.classList.remove('swap'); }, 500);
+}
+function railHighlight(){
+  const mid = innerHeight / 2;
+  let best = 0, bd = 1e9;
+  railBlocks.forEach((b, i) => {
+    const r = b.getBoundingClientRect();
+    const d = Math.abs(r.top + r.height / 2 - mid);
+    if (d < bd) { bd = d; best = i; }
+  });
+  railBlocks.forEach((b, i) => b.classList.toggle('active', i === best));
+}
+
+function buildCards(){
+  MATERIALS.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'mat-card';
+    const thumb = document.createElement('canvas');
+    thumb.width = 512; thumb.height = 384;
+    thumb.getContext('2d').drawImage(TEX_CANVASES[m.tex], 0, 0, 512, 384);
+    card.appendChild(thumb);
+    const pad = document.createElement('div');
+    pad.className = 'pad';
+    pad.innerHTML = '<div class="label">' + m.cat + '</div><h3>' + m.name + '</h3><div class="tone">' + m.tone + '</div><p>' + m.desc + '</p>';
+    card.appendChild(pad);
+    matCards.appendChild(card);
+  });
+}
+function webglOK(){
+  try { const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch(e){ return false; }
+}
+
+let threeInit = false;
+async function initMaterials3D(){
+  if (threeInit) return; threeInit = true;
+  const mobile = matchMedia('(max-width: 767px)').matches;
+  if (mobile || reduced || !webglOK()) {
+    matSection.classList.add('static');
+    buildCards();
+    return;
+  }
+  try {
+    const THREE = await import('three');
+    const { RoundedBoxGeometry } = await import('three/addons/geometries/RoundedBoxGeometry.js');
+
+    const canvas = document.getElementById('matCanvas');
+    const wrap = canvas.parentElement;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+    camera.position.set(0, 0.25, 3.6);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe6f2, 1.0));
+    const key = new THREE.DirectionalLight(0xffffff, 1.7); key.position.set(2.5, 3, 2.2); scene.add(key);
+    const rim = new THREE.DirectionalLight(0x9db4d0, 0.9); rim.position.set(-3, -1, -2.5); scene.add(rim);
+
+    const group = new THREE.Group(); scene.add(group);
+    const textures = {};
+    MATERIALS.forEach(m => {
+      const t = new THREE.CanvasTexture(TEX_CANVASES[m.tex]);
+      t.colorSpace = THREE.SRGBColorSpace;
+      textures[m.tex] = t;
+    });
+    const slab = new THREE.Mesh(
+      new RoundedBoxGeometry(2.3, 1.55, 0.22, 5, 0.07),
+      new THREE.MeshStandardMaterial({ map: textures[MATERIALS[0].tex], roughness: 0.75, metalness: 0.05 })
+    );
+    group.add(slab);
+
+    function resize(){
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    resize(); addEventListener('resize', resize);
+
+    let targetRotY = 0, tiltX = 0, tiltTargetX = 0, running = true;
+    wrap.addEventListener('mousemove', e => {
+      const r = wrap.getBoundingClientRect();
+      tiltTargetX = ((e.clientY - r.top) / r.height - 0.5) * 0.22;
+    });
+
+    function onScroll(){
+      const rect = matSection.getBoundingClientRect();
+      const total = matSection.offsetHeight - innerHeight;
+      const p = Math.min(1, Math.max(0, -rect.top / total));
+      matState.p = p;
+      updateRing(p);
+      updateRail(p);
+      const idx = Math.min(MATERIALS.length - 1, Math.floor(p * MATERIALS.length));
+      if (idx !== matState.index) {
+        matState.index = idx;
+        slab.material.map = textures[MATERIALS[idx].tex];
+        slab.material.roughness = MATERIALS[idx].tex === 'brass' ? 0.35 : 0.75;
+        slab.material.metalness = MATERIALS[idx].tex === 'brass' ? 0.75 : 0.05;
+        slab.material.needsUpdate = true;
+        targetRotY += Math.PI * 2;
+        matIdxEl.textContent = String(idx + 1).padStart(2,'0') + ' / 06';
+        swapName(idx);
+      }
+      railHighlight();
+    }
+    addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+
+    new IntersectionObserver(([e]) => { running = e.isIntersecting; }, {threshold: 0}).observe(matSection);
+
+    const clock = new THREE.Clock();
+    (function loop(){
+      requestAnimationFrame(loop);
+      if (!running) return;
+      const dt = Math.min(clock.getDelta(), 0.05);
+      targetRotY += dt * 0.12;
+      group.rotation.y += (targetRotY - group.rotation.y) * Math.min(1, dt * 6);
+      tiltX += (tiltTargetX - tiltX) * Math.min(1, dt * 5);
+      group.rotation.x = tiltX;
+      renderer.render(scene, camera);
+    })();
+  } catch (err) {
+    matSection.classList.add('static');
+    buildCards();
+  }
+}
+new IntersectionObserver(([e], io) => {
+  if (e.isIntersecting) { initMaterials3D(); io.disconnect(); }
+}, {rootMargin: '200% 0px'}).observe(matSection);
+
+/* ================================================================
+   ABOUT — portrait parallax
+================================================================ */
+if (!reduced) {
+  const portrait = document.getElementById('portraitImg');
+  const aboutSec = document.querySelector('.about');
+  addEventListener('scroll', () => {
+    if (!portrait || !portrait.isConnected) return;
+    const r = aboutSec.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const p = 1 - (r.top + r.height / 2) / (innerHeight + r.height / 2);
+    portrait.style.transform = 'translateY(' + ((p - 0.5) * -40) + 'px)';
+  }, {passive:true});
+}
+</script>
+</body>
+</html>
