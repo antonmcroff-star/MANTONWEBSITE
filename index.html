@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  MANTON — v2 FINAL
+  MANTON — v2 FINAL (FIXED)
   =====================================================
   ALL FIXES APPLIED:
     - Materials: names sync with scroll
@@ -128,7 +128,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .project-card:hover .card-underline{transform:scaleX(1)}
 
 /* ---------- portfolio thumbnail ---------- */
-.portfolio-card{position:relative;aspect-ratio:16/10;overflow:hidden;cursor:pointer;background:var(--bg);grid-column:1/-1;display:block;width:100%}
+.portfolio-card{position:relative;aspect-ratio:16/10;overflow:hidden;cursor:pointer;background:var(--bg);grid-column:1/-1;display:block;width:100%;text-decoration:none;color:inherit}
 .portfolio-card img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
 .portfolio-card:hover img{transform:scale(1.04)}
 .portfolio-scrim{position:absolute;inset:auto 0 0 0;padding:70px 26px 24px;background:linear-gradient(to top,rgba(255,255,255,.94) 0%,rgba(255,255,255,0) 100%)}
@@ -155,8 +155,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .tour-tab{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 20px;border-radius:30px;
   font:inherit;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.3s}
 .tour-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
-.tour-frame-wrap{position:relative;aspect-ratio:16/9;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000}
-.tour-frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tour-actions{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap}
 .tour-caption{margin-top:16px;font-size:13px;color:var(--ink-soft);letter-spacing:.05em}
 .ar-feature{display:grid;grid-template-columns:1.1fr 1fr;gap:5vw;margin-top:12vh;align-items:center}
 .ar-feature .ar-img{border-radius:4px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/11}
@@ -183,6 +182,9 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 #matRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(74%,520px);height:auto;z-index:1;pointer-events:none}
 .mat-tagcard{position:absolute;right:26px;bottom:34px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:6px;
   padding:12px 16px;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.mat-name-wrap{position:absolute;left:26px;bottom:34px;z-index:3;max-width:calc(100% - 320px);overflow:hidden;height:1.12em}
+#matName{font-size:clamp(24px,3.4vw,56px);font-weight:500;line-height:1.06;letter-spacing:-0.02em;white-space:nowrap;color:var(--ink);display:block;transition:transform .5s var(--ease)}
+#matName.swap{transform:translateY(-110%)}
 .mat-rail{position:absolute;right:0;top:0;width:45%;height:100%;pointer-events:none}
 .mat-block{position:absolute;right:8vw;width:min(30vw,380px);opacity:.28;transform:translateY(-50%);transition:opacity .5s var(--ease)}
 .mat-block.active{opacity:1}
@@ -200,13 +202,6 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .mat-card h3{font-size:20px;font-weight:400;margin:10px 0 4px}
 .mat-card .tone{font-size:11px;letter-spacing:.1em;color:var(--blue);margin-bottom:10px}
 .mat-card p{font-size:13px;line-height:1.65;color:var(--ink-soft)}
-
-.mat-rail{z-index:2}
-.mat-name-wrap{position:absolute;left:26px;bottom:34px;z-index:3;overflow:hidden;
-  height:1.12em;font-size:clamp(26px,3.6vw,56px)}
-#matName{font-size:1em;font-weight:500;line-height:1.06;letter-spacing:-0.02em;
-  white-space:nowrap;color:var(--ink);transition:transform .5s var(--ease)}
-#matName.swap{transform:translateY(-110%)}
 
 /* ---------- philosophy ---------- */
 .philosophy{background:var(--bg-alt);padding:16vh 8%}
@@ -360,7 +355,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
   <div class="projects-grid" id="projectsGrid"></div>
   
   <!-- PORTFOLIO THUMBNAIL -->
-  <a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener" class="portfolio-card" data-reveal style="text-decoration:none;color:inherit">
+  <a href="https://www.pdf-flip.com/viewers/360315/jxgr59.html" target="_blank" rel="noopener" class="portfolio-card" data-reveal>
     <img src="portfolio-cover.jpg" alt="Portfolio" loading="lazy">
     <div class="portfolio-scrim">
       <div class="portfolio-name">Full Portfolio</div>
@@ -387,14 +382,14 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
   <div class="tours-block" data-reveal>
     <div class="tours-label">
       <span class="label">360° Tours</span>
-      <span class="label" style="color:var(--ink-soft)">Drag to look around</span>
+      <span class="label" style="color:var(--ink-soft)">Select a project below</span>
     </div>
     <div class="tour-tabs" id="tourTabs"></div>
-    <div class="tour-actions" style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+    <div class="tour-actions">
       <a id="tourBtn" class="ghost-btn" href="#" target="_blank" rel="noopener" style="display:none">Open 360° Tour ↗</a>
       <span id="tourHint" class="label" style="color:var(--ink-soft)">Select a project above</span>
-      </div>
-   <div class="tour-caption" id="tourCaption" style="margin-top:16px;font-size:13px;color:var(--ink-soft);letter-spacing:.05em"></div>
+    </div>
+    <div class="tour-caption" id="tourCaption"></div>
   </div>
 
   <div class="ar-feature" data-reveal>
@@ -404,10 +399,10 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
       <h3>Place it on your site</h3>
       <p class="body-text">Scan the code with your phone — or open the scene directly — and the Villa Intime model appears in your space, slowly rotating so you can walk around it.</p>
       <div class="ar-actions">
-       <a class="pill" id="arBtn" href="https://www.kivicube.com/scenes-beta/enf6rWG9JBNzpzSLKdiXafzFn9xmKSPJ" target="_blank" rel="noopener">View in AR</a>
-       <div class="qr-card"><div id="qrbox"></div><span class="label">Scan QR to open AR</span></div>
-       <div class="qr-card"><img src="AR-logo.jpg" alt="Scan for AR" style="width:96px;height:96px;object-fit:cover"><span class="label">Scan logo for AR</span></div>
-</div>
+        <a class="pill" id="arBtn" href="https://www.kivicube.com/scenes-beta/enf6rWG9JBNzpzSLKdiXafzFn9xmKSPJ" target="_blank" rel="noopener">View in AR</a>
+        <div class="qr-card"><div id="qrbox"></div><span class="label">Scan QR to open AR</span></div>
+        <div class="qr-card"><img src="AR-logo.jpg" alt="Scan for AR" style="width:96px;height:96px;object-fit:cover"><span class="label">Scan logo for AR</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -419,12 +414,12 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
       <svg id="matRing" viewBox="0 0 400 400" aria-hidden="true"></svg>
       <canvas id="matCanvas"></canvas>
       <div class="mat-chip"><span class="chip">MATERIALS</span><span class="idx" id="matIdx">01 / 06</span></div>
-	  <p class="mat-intro">Discover the tactile harmonies and bespoke materials shaping these interior spaces.</p>
+      <p class="mat-intro">Discover the tactile harmonies and bespoke materials shaping these interior spaces.</p>
       <div class="mat-tagcard">MANTON — Sensory Archive</div>
       <div class="mat-name-wrap"><h2 id="matName">French Rift Oak</h2></div>
     </div>
+    <div class="mat-rail" id="matRail"></div>
   </div>
-  <div class="mat-rail" id="matRail"></div>
   <div class="mat-cards" id="matCards"></div>
 </section>
 
@@ -444,7 +439,7 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 <!-- FOOTER -->
 <footer class="footer" id="contact">
   <h2 data-reveal>Let's build something permanent.</h2>
-  <a class="pill" href="mailto:chegeantony74@gmail.com" data-reveal>Start a commission</a>
+  <a class="pill" href="https://wa.me/254792003373?text=Hi%20Antony,%20I%27m%20interested%20in%20starting%20a%20commission" target="_blank" rel="noopener" data-reveal>Start a commission</a>
   <div class="footer-row">
     <span>© 2026 Manton Enterprises</span>
     <span>Nairobi, Kenya</span>
@@ -483,8 +478,8 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 ================================================================ */
 const CONFIG = {
   panoeeTours: {
-    'villa-intime': 'https://virto360.com/share/aefec3c54ddfa28a42b4',
-    'kitengela-hearth': 'https://virto360.com/share/3d78ade83e716969990f',
+    'villa-intime': 'https://virto360.com/share/3d78ade83e716969990f',
+    'kitengela-hearth': 'https://virto360.com/share/aefec3c54ddfa28a42b4',
     'kerarapon-villa': 'https://virto360.com/share/306ee9e80925a23e5605',
     'chevron-hotel': 'https://virto360.com/share/ca1fade19e5e6e747df0',
     '9021-terrace': 'https://virto360.com/share/b3e862036bbed95e80c1',
@@ -649,16 +644,22 @@ function openModal(id){
 
   const actions = document.getElementById('modalActions');
   actions.innerHTML = '';
-    if (p.tour360) {
+  if (p.tour360) {
     const a = document.createElement('a');
-    a.className = 'ghost-btn'; a.textContent = '360° Tour ↗';
-    a.href = p.tour360; a.target = '_blank'; a.rel = 'noopener';
+    a.className = 'ghost-btn';
+    a.textContent = '360° Tour ↗';
+    a.href = p.tour360;
+    a.target = '_blank';
+    a.rel = 'noopener';
     actions.appendChild(a);
   }
   if (p.arLink) {
     const a = document.createElement('a');
-    a.className = 'ghost-btn'; a.textContent = 'View in AR';
-    a.href = p.arLink; a.target = '_blank'; a.rel = 'noopener';
+    a.className = 'ghost-btn';
+    a.textContent = 'View in AR';
+    a.href = p.arLink;
+    a.target = '_blank';
+    a.rel = 'noopener';
     actions.appendChild(a);
   }
 
@@ -731,8 +732,8 @@ addEventListener('keydown', e => {
    360 HOME VIEWER
 ================================================================ */
 const tourTabs = document.getElementById('tourTabs');
-const tourFrame = document.getElementById('tourFrame');
-const tourPlaceholder = document.getElementById('tourPlaceholder');
+const tourBtn = document.getElementById('tourBtn');
+const tourHint = document.getElementById('tourHint');
 const tourCaption = document.getElementById('tourCaption');
 const toursAvailable = PROJECTS.filter(p => p.tour360);
 if (toursAvailable.length === 0) {
@@ -745,9 +746,9 @@ if (toursAvailable.length === 0) {
     b.onclick = () => {
       tourTabs.querySelectorAll('.tour-tab').forEach(t => t.classList.remove('active'));
       b.classList.add('active');
-      tourPlaceholder.style.display = 'none';
-      tourFrame.style.opacity = '1';
-      tourFrame.src = p.tour360;
+      tourBtn.href = p.tour360;
+      tourBtn.style.display = 'inline-block';
+      tourHint.style.display = 'none';
       tourCaption.textContent = p.name + ' — ' + p.location;
     };
     tourTabs.appendChild(b);
@@ -896,6 +897,7 @@ const matStage = document.getElementById('matStage');
 const matRail = document.getElementById('matRail');
 const matCards = document.getElementById('matCards');
 const matIdxEl = document.getElementById('matIdx');
+const matNameEl = document.getElementById('matName');
 const ringSvg = document.getElementById('matRing');
 
 MATERIALS.forEach((m, i) => {
@@ -918,12 +920,6 @@ for (let i = 0; i < 60; i++) {
 }
 
 let matState = { index: 0, p: 0 };
-const matNameEl = document.getElementById('matName');
-function swapName(i){
-  if (reduced) { matNameEl.textContent = MATERIALS[i].name; return; }
-  matNameEl.classList.add('swap');
-  setTimeout(() => { matNameEl.textContent = MATERIALS[i].name; matNameEl.classList.remove('swap'); }, 500);
-}
 
 function updateRing(p){
   const lit = Math.round(p * 60);
@@ -932,6 +928,11 @@ function updateRing(p){
 function updateRail(p){
   const idx = Math.min(MATERIALS.length - 1, Math.floor(p * MATERIALS.length));
   railBlocks.forEach((b, i) => b.classList.toggle('active', i === idx));
+}
+function swapName(i){
+  if (reduced) { matNameEl.textContent = MATERIALS[i].name; return; }
+  matNameEl.classList.add('swap');
+  setTimeout(() => { matNameEl.textContent = MATERIALS[i].name; matNameEl.classList.remove('swap'); }, 500);
 }
 function railHighlight(){
   const mid = innerHeight / 2;
@@ -1022,6 +1023,7 @@ async function initMaterials3D(){
       const p = Math.min(1, Math.max(0, -rect.top / total));
       matState.p = p;
       updateRing(p);
+      updateRail(p);
       const idx = Math.min(MATERIALS.length - 1, Math.floor(p * MATERIALS.length));
       if (idx !== matState.index) {
         matState.index = idx;
