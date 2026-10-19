@@ -275,6 +275,17 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .lightbox iframe{position:absolute;inset:4vh 4vw;width:92vw;height:92vh;border:0}
 .lightbox-close{position:absolute;top:20px;right:26px;background:none;border:0;color:#fff;font-size:34px;cursor:pointer;font-family:inherit}
 
+/* ---------- rotate prompt (mobile portrait only) ---------- */
+.rotate-prompt{display:none;position:fixed;inset:0;background:var(--blue);color:#fff;z-index:9999;
+  align-items:center;justify-content:center;text-align:center;padding:20px;flex-direction:column;gap:24px}
+.rotate-prompt .rp-icon{width:44px;height:76px;border:3px solid #fff;border-radius:10px;position:relative;
+  animation:rpspin 2.4s var(--ease) infinite}
+.rotate-prompt .rp-icon::after{content:'';position:absolute;left:50%;bottom:7px;width:14px;height:3px;
+  background:#fff;border-radius:2px;transform:translateX(-50%)}
+@keyframes rpspin{0%,25%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+.rotate-prompt p{font-size:18px;line-height:1.6;max-width:280px}
+@media (max-width:767px) and (orientation:portrait){.rotate-prompt{display:flex}}
+
 /* ---------- responsive ---------- */
 @media (max-width:900px){
   .projects-grid{grid-template-columns:1fr}
@@ -306,6 +317,12 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 </style>
 </head>
 <body>
+
+<!-- ROTATE PROMPT (mobile portrait) -->
+<div class="rotate-prompt" aria-hidden="true">
+  <div class="rp-icon"></div>
+  <p>Rotate your device.<br>This experience is designed for landscape.</p>
+</div>
 
 <!-- NAV -->
 <nav class="nav" id="nav">
@@ -1175,6 +1192,25 @@ function philUpdate(){
 addEventListener('scroll', philUpdate, {passive:true});
 addEventListener('resize', philUpdate);
 philUpdate();
+
+/* ================================================================
+   ROTATE PROMPT — lock scroll while visible; never fights the modal lock
+================================================================ */
+let rotateLocked = false;
+function checkOrientation(){
+  const prompt = document.querySelector('.rotate-prompt');
+  const show = innerWidth < 768 && innerHeight > innerWidth;
+  prompt.style.display = show ? 'flex' : 'none';
+  if (show && !rotateLocked && !modal.classList.contains('active')) {
+    rotateLocked = true; document.body.style.overflow = 'hidden';
+  } else if (!show && rotateLocked) {
+    rotateLocked = false;
+    if (!modal.classList.contains('active')) document.body.style.overflow = '';
+  }
+}
+addEventListener('resize', checkOrientation);
+addEventListener('orientationchange', checkOrientation);
+checkOrientation();
 
 /* ================================================================
    ABOUT — portrait parallax
