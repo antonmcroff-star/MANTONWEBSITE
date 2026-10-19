@@ -71,10 +71,11 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .menu-close{position:absolute;top:26px;right:4vw;background:none;border:0;font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);cursor:pointer}
 
 /* ---------- hero ---------- */
-.hero{position:relative;width:100vw;height:200vh}
+.hero{position:relative;width:100vw;height:280vh}
 .hero-sticky{position:sticky;top:0;width:100%;height:100vh;overflow:hidden}
 .hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#image-warm{opacity:0}
+#heroPoster{animation:kb 26s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.07)}}
 .hero-shade{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 45%)}
 .hero-content{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;width:90%;max-width:900px}
 .hero-logo-wrap{display:flex;align-items:center;gap:18px;margin-bottom:26px}
@@ -182,8 +183,11 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 #matRing{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(74%,520px);height:auto;z-index:1;pointer-events:none}
 .mat-tagcard{position:absolute;right:26px;bottom:34px;z-index:3;background:#fff;border:1px solid var(--line);border-radius:6px;
   padding:12px 16px;font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
-.mat-name-wrap{position:absolute;left:26px;bottom:34px;z-index:3;max-width:calc(100% - 320px);overflow:hidden;height:1.12em}
-#matName{font-size:clamp(24px,3.4vw,56px);font-weight:500;line-height:1.06;letter-spacing:-0.02em;white-space:nowrap;color:var(--ink);display:block;transition:transform .5s var(--ease)}
+/* DO NOT delete font-size from .mat-name-wrap: the em-based height below depends on it.
+   (Removing it clips the giant name to an ~18px sliver — this bug has regressed twice.) */
+.mat-name-wrap{position:absolute;left:26px;bottom:34px;z-index:3;max-width:calc(100% - 320px);overflow:hidden;
+  height:1.12em;font-size:clamp(24px,3.4vw,56px)}
+#matName{font-size:1em;font-weight:500;line-height:1.06;letter-spacing:-0.02em;white-space:nowrap;color:var(--ink);display:block;transition:transform .5s var(--ease)}
 #matName.swap{transform:translateY(-110%)}
 .mat-rail{position:absolute;right:0;top:0;width:45%;height:100%;pointer-events:none}
 .mat-block{position:absolute;right:8vw;width:min(30vw,380px);opacity:.28;transform:translateY(-50%);transition:opacity .5s var(--ease)}
@@ -204,14 +208,20 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 .mat-card p{font-size:13px;line-height:1.65;color:var(--ink-soft)}
 
 /* ---------- philosophy ---------- */
-.philosophy{background:var(--bg-alt);padding:16vh 8%}
-.philosophy-header{text-align:center;margin-bottom:10vh}
-.philosophy-header .label{color:var(--ink-soft)}
-.philosophy-header h2{font-size:var(--step-h2);font-weight:400;margin-top:18px;text-transform:none}
+.philosophy{position:relative;height:340vh;background:var(--bg-alt)}
+.phil-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.phil-sticky::before{content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(0,10,25,.14) 0%,rgba(0,10,25,.42) 100%)}
+.phil-graphics{position:absolute;inset:0}
+.phil-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.34}
+#philImgB{opacity:0}
+.phil-content{position:relative;z-index:2;text-align:center;width:min(1200px,92vw)}
+.philosophy-header{margin-bottom:8vh}
+.philosophy-header .label{color:rgba(255,255,255,0.78);text-shadow:0 1px 14px rgba(0,0,0,.35)}
+.philosophy-header h2{font-size:var(--step-h2);font-weight:400;margin-top:18px;text-transform:none;color:#fff;text-shadow:0 2px 22px rgba(0,0,0,.45)}
 .principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6vw;max-width:1400px;margin:0 auto}
-.principle-num{font-size:14px;font-weight:400;color:var(--blue);letter-spacing:.1em;margin-bottom:26px}
-.principle h3{font-size:22px;font-weight:400;line-height:1.3;margin-bottom:20px}
-.principle p{font-size:14px;line-height:1.9;color:var(--ink-soft)}
+.principle-num{font-size:14px;font-weight:400;color:rgba(255,255,255,0.65);letter-spacing:.1em;margin-bottom:26px;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+.principle h3{font-size:22px;font-weight:400;line-height:1.3;margin-bottom:20px;color:#fff;text-shadow:0 1px 14px rgba(0,0,0,.4)}
+.principle p{font-size:14px;line-height:1.9;color:rgba(255,255,255,0.82);text-shadow:0 1px 10px rgba(0,0,0,.35)}
 
 /* ---------- footer ---------- */
 .footer{background:var(--bg);padding:18vh 8vw 40px;border-top:1px solid var(--line);text-align:center}
@@ -274,6 +284,11 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
   .principles-grid{grid-template-columns:1fr;gap:60px}
 }
 @media (max-width:767px){
+  .philosophy{height:auto;padding:14vh 8vw}
+  .phil-sticky{position:static;height:auto;display:block}
+  .phil-graphics{position:relative;inset:auto;height:36vh;margin:0 -8vw 8vh}
+  .phil-img{opacity:.35}
+  .principle{opacity:1!important;transform:none!important}
   .nav-links{display:none}
   .menu-toggle{display:block}
   .tod-fullscreen .tod-overlay{left:20px;bottom:18px}
@@ -308,8 +323,8 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
 <!-- HERO -->
 <section class="hero" id="top">
   <div class="hero-sticky">
-    <img src="overcastinteriorrender.png" alt="Overcast interior render" class="hero-image" id="imageCool" fetchpriority="high">
-    <img src="lighting interiorrender.png" alt="Interior in warm lighting" class="hero-image" id="imageWarm">
+    <img class="hero-image" id="heroPoster" src="" alt="Villa Intime animation" style="background:#0d1622">
+    <canvas class="hero-image" id="heroCanvas" style="opacity:0;transition:opacity .4s"></canvas>
     <div class="hero-shade"></div>
     <div class="hero-content">
       <div class="hero-logo-wrap">
@@ -418,21 +433,31 @@ h1,h2,h3{font-weight:500;letter-spacing:-0.02em}
       <div class="mat-tagcard">MANTON — Sensory Archive</div>
       <div class="mat-name-wrap"><h2 id="matName">French Rift Oak</h2></div>
     </div>
-    <div class="mat-rail" id="matRail"></div>
   </div>
+  <!-- .mat-rail MUST stay a direct child of #materials. Inside .mat-stage it is clipped
+       by the sticky stage's overflow:hidden — that is why only "French Rift Oak" ever showed. -->
+  <div class="mat-rail" id="matRail"></div>
   <div class="mat-cards" id="matCards"></div>
 </section>
 
 <!-- PHILOSOPHY -->
 <section class="philosophy" id="philosophy">
-  <div class="philosophy-header" data-reveal>
-    <div class="label">Atelier Philosophy</div>
-    <h2>Three Principles of Form &amp; Radiance</h2>
-  </div>
-  <div class="principles-grid">
-    <div class="principle" data-reveal><div class="principle-num">01</div><h3>The Dialogue of Twilight</h3><p>We design for the liminal hour when exterior daylight surrenders to interior warmth.</p></div>
-    <div class="principle" data-reveal><div class="principle-num">02</div><h3>Indirect Illumination as Structure</h3><p>Light is not an accessory applied after construction. It is a spatial material sculpted simultaneously with concrete and wood.</p></div>
-    <div class="principle" data-reveal><div class="principle-num">03</div><h3>Permanence Through Honesty</h3><p>We reject transient trends in favor of natural materials that record time with grace.</p></div>
+  <div class="phil-sticky">
+    <div class="phil-graphics">
+      <img class="phil-img" id="philImgA" src="overcastinteriorrender.png" alt="" loading="lazy">
+      <img class="phil-img" id="philImgB" src="lighting interiorrender.png" alt="" loading="lazy">
+    </div>
+    <div class="phil-content">
+      <div class="philosophy-header">
+        <div class="label">Atelier Philosophy</div>
+        <h2>Three Principles of Form &amp; Radiance</h2>
+      </div>
+      <div class="principles-grid">
+        <div class="principle"><div class="principle-num">01</div><h3>The Dialogue of Twilight</h3><p>We design for the liminal hour when exterior daylight surrenders to interior warmth.</p></div>
+        <div class="principle"><div class="principle-num">02</div><h3>Indirect Illumination as Structure</h3><p>Light is not an accessory applied after construction. It is a spatial material sculpted simultaneously with concrete and wood.</p></div>
+        <div class="principle"><div class="principle-num">03</div><h3>Permanence Through Honesty</h3><p>We reject transient trends in favor of natural materials that record time with grace.</p></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -585,11 +610,70 @@ document.getElementById('portraitImg').addEventListener('error', function(){ thi
 /* ================================================================
    HERO crossfade
 ================================================================ */
-const imageCool = document.getElementById('imageCool');
-const imageWarm = document.getElementById('imageWarm');
-addEventListener('scroll', () => {
-  imageWarm.style.opacity = Math.min(scrollY / innerHeight, 1);
-}, {passive:true});
+/* HERO: scroll-scrubbed CANVAS FRAME SEQUENCE — synchronous draws, no decoder stutter.
+   Frames live in video-jpg/ (285 jpgs). Naming is auto-detected across 3 common patterns;
+   if yours differs, put it first in FR.patterns below ( %04d = 4-digit frame number ). */
+const heroCanvas = document.getElementById('heroCanvas');
+const heroPoster = document.getElementById('heroPoster');
+const hctx = heroCanvas.getContext('2d');
+const FR = { folder: 'video-jpg', count: 285,
+  patterns: ['%04d.jpg', 'frame-%04d.jpg', 'video1_%04d.jpg'] };
+let pat = 0;
+const frames = new Array(FR.count).fill(null);
+let lastFrame = -1;
+function fsrc(n){ return FR.folder + '/' + FR.patterns[pat].replace('%04d', String(n).padStart(4,'0')); }
+function sizeHero(){
+  const d = Math.min(devicePixelRatio, 1.5);
+  heroCanvas.width = innerWidth * d; heroCanvas.height = innerHeight * d;
+  hctx.setTransform(d, 0, 0, d, 0, 0); lastFrame = -1;
+}
+sizeHero(); addEventListener('resize', sizeHero);
+function loadFrame(n){
+  if (n < 1 || n > FR.count) return null;
+  if (!frames[n-1]) { const im = new Image(); im.src = fsrc(n); frames[n-1] = im; }
+  return frames[n-1];
+}
+function drawCover(im){
+  const cw = innerWidth, ch = innerHeight;
+  const s = Math.max(cw / im.width, ch / im.height);
+  const w = im.width * s, h = im.height * s;
+  hctx.clearRect(0, 0, cw, ch);
+  hctx.drawImage(im, (cw - w) / 2, (ch - h) / 2, w, h);
+}
+const heroSec = document.querySelector('.hero');
+function heroScrub(){
+  if (innerWidth < 768 || reduced) return;   /* mobile: poster + CSS ken-burns (see style) */
+  const rect = heroSec.getBoundingClientRect();
+  if (rect.bottom < 0 || rect.top > innerHeight) return;
+  const total = heroSec.offsetHeight - innerHeight;
+  const p = Math.min(1, Math.max(0, -rect.top / total));
+  const n = Math.min(FR.count, Math.max(1, Math.round(p * (FR.count - 1)) + 1));
+  let m = n;
+  while (m > 0 && !(frames[m-1] && frames[m-1].complete && frames[m-1].naturalWidth)) m--;
+  if (m > 0 && m !== lastFrame) {
+    drawCover(frames[m-1]); lastFrame = m;
+    heroCanvas.style.opacity = 1;
+    if (m === 1) heroPoster.style.opacity = 0;
+  }
+  for (let k = n; k <= Math.min(FR.count, n + 8); k++) loadFrame(k);
+}
+addEventListener('scroll', () => requestAnimationFrame(heroScrub), {passive:true});
+(function probePattern(){
+  const im = new Image();
+  im.onload = () => {
+    heroPoster.src = fsrc(1);
+    loadFrame(1);
+    for (let i = 2; i <= 24; i++) loadFrame(i);
+    let next = 25;
+    const t = setInterval(() => {
+      for (let j = 0; j < 4 && next <= FR.count; j++) loadFrame(next++);
+      if (next > FR.count) clearInterval(t);
+    }, 250);
+    heroScrub();
+  };
+  im.onerror = () => { pat++; frames.fill(null); if (pat < FR.patterns.length) probePattern(); };
+  im.src = fsrc(1);
+})();
 
 /* ================================================================
    REVEALS
@@ -1061,6 +1145,36 @@ async function initMaterials3D(){
 new IntersectionObserver(([e], io) => {
   if (e.isIntersecting) { initMaterials3D(); io.disconnect(); }
 }, {rootMargin: '200% 0px'}).observe(matSection);
+
+/* ================================================================
+   PHILOSOPHY — scroll-driven: images crossfade, principles appear in sequence
+================================================================ */
+const philSec = document.getElementById('philosophy');
+const philItems = philSec.querySelectorAll('.principle');
+const philImgA = document.getElementById('philImgA');
+const philImgB = document.getElementById('philImgB');
+function philUpdate(){
+  if (reduced || innerWidth < 768) {
+    philItems.forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
+    philImgA.style.opacity = .35;
+    philImgB.style.opacity = .35;
+    return;
+  }
+  const rect = philSec.getBoundingClientRect();
+  const total = philSec.offsetHeight - innerHeight;
+  const p = Math.min(1, Math.max(0, -rect.top / total));
+  const bp = Math.min(1, Math.max(0, (p - .12) / .5));
+  philImgB.style.opacity = bp * .95;
+  philImgA.style.opacity = (1 - bp) * .95;
+  philItems.forEach((el, i) => {
+    const lp = Math.min(1, Math.max(0, (p - (.2 + i * .2)) / .14));
+    el.style.opacity = lp;
+    el.style.transform = 'translateY(' + (1 - lp) * 34 + 'px)';
+  });
+}
+addEventListener('scroll', philUpdate, {passive:true});
+addEventListener('resize', philUpdate);
+philUpdate();
 
 /* ================================================================
    ABOUT — portrait parallax
