@@ -335,7 +335,7 @@ const CONFIG = {
     { folder: 'frames-adam', count: 851 }   // frames 1-560 = adam, 561-851 = part 2
   ],
   plan: { folder: 'frames-plan', count: 300 },
-  patterns: ['%04d.jpg', 'frame-%04d.jpg'],
+  patterns: ['%04d.webp', 'frame-%04d.webp'],
   audio: {
     music: 'assets/audio/eden.mp3',   // optional classical track
     volume: 0.32,
@@ -357,21 +357,21 @@ const CONTROLS = {
 const LINES = ['You know it;','study hard.','endure studio.','endless all-nighters.','burnout.','crashes.','insanity.'];
 const COMPETITORS = ['SUAPP','Archvinci','Synapse','Treform','Vibe3D','DaVinci'];
 const STAGES = [
-  { tag:'Stage 01', title:'Site Analysis',  copy:'Sun, wind, zoning and context — read from a pin.', img:'assets/stages/01-site.jpg' },
-  { tag:'Stage 02', title:'Concept',        copy:'Directions, not drawings. You choose, it builds.', img:'assets/stages/02-concept.jpg' },
-  { tag:'Stage 03', title:'Outline & Scheme', copy:'Grid, massing and bylaws resolved together.', img:'assets/stages/03-scheme.jpg' },
-  { tag:'Stage 04', title:'Detail',         copy:'Junctions, schedules, real assemblies.', img:'assets/stages/04-detail.jpg' },
-  { tag:'Stage 05', title:'Rendering & Docs', copy:'The full presentation set, exported in one pass.', img:'assets/stages/05-render.jpg' }
+  { tag:'Stage 01', title:'Site Analysis',  copy:'Sun, wind, zoning and context — read from a pin.', img:'assets/stages/01-site.webp' },
+  { tag:'Stage 02', title:'Concept',        copy:'Directions, not drawings. You choose, it builds.', img:'assets/stages/02-concept.webp' },
+  { tag:'Stage 03', title:'Outline & Scheme', copy:'Grid, massing and bylaws resolved together.', img:'assets/stages/03-scheme.webp' },
+  { tag:'Stage 04', title:'Detail',         copy:'Junctions, schedules, real assemblies.', img:'assets/stages/04-detail.webp' },
+  { tag:'Stage 05', title:'Rendering & Docs', copy:'The full presentation set, exported in one pass.', img:'assets/stages/05-render.webp' }
 ];
 const IMAGINE = [
   { tag:'Stage 01', provide:'full site coordinates, dimensions, satellite imagery — and the brief.',
-    getback:'a complete <b>site analysis document</b>.', imgs:['assets/imagine/site-01.jpg','assets/imagine/site-02.jpg'] },
+    getback:'a complete <b>site analysis document</b>.', imgs:['assets/imagine/site-01.webp','assets/imagine/site-02.webp'] },
   { tag:'Stage 02', provide:'hand sketches and a detailed explanation of your concept.',
-    getback:'a full <b>concept design</b> — sketches digitized, presentation-clean.', imgs:['assets/imagine/concept-01.jpg','assets/imagine/concept-02.jpg'] },
+    getback:'a full <b>concept design</b> — sketches digitized, presentation-clean.', imgs:['assets/imagine/concept-01.webp','assets/imagine/concept-02.webp'] },
   { tag:'Stage 03', provide:'a single sketch of your design.',
-    getback:'a <b>fully built model</b>, complete with documentation sheets.', imgs:['assets/imagine/scheme-01.jpg','assets/imagine/scheme-02.jpg'] },
+    getback:'a <b>fully built model</b>, complete with documentation sheets.', imgs:['assets/imagine/scheme-01.webp','assets/imagine/scheme-02.webp'] },
   { tag:'Stage 04', provide:'a simple screenshot of your CAD model.',
-    getback:'a <b>4K photorealistic render</b>.', imgs:['assets/imagine/render-01.jpg','assets/imagine/render-02.jpg'] }
+    getback:'a <b>4K photorealistic render</b>.', imgs:['assets/imagine/render-01.webp','assets/imagine/render-02.webp'] }
 ];
 const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
